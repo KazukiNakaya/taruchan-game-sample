@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://breo6w1dlixu2"
-path.s3tc="res://.godot/imported/Meshy_AI_taruchan4_All_Animations_texture_0.png-9ab7ac723cbfc735deb95c008f88ea06.s3tc.ctex"
+uid="uid://djkiw0evhr5gk"
+path.s3tc="res://.godot/imported/taruchan_rigged_texture_0.png-97ff90eca4cf2b20b0a2933281b1136d.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/taruchan/Meshy_AI_taruchan4_All_Animations_texture_0.png"
-dest_files=["res://.godot/imported/Meshy_AI_taruchan4_All_Animations_texture_0.png-9ab7ac723cbfc735deb95c008f88ea06.s3tc.ctex"]
+source_file="res://models/taruchan/taruchan_rigged_texture_0.png"
+dest_files=["res://.godot/imported/taruchan_rigged_texture_0.png-97ff90eca4cf2b20b0a2933281b1136d.s3tc.ctex"]
 
 [params]
 

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://tuffjtlepj7d"
-path="res://.godot/imported/Meshy_AI_taruchan4_All_Animations.glb-e14e31628c23b2f520876759e11c7246.scn"
+uid="uid://ds80i15lqo4nt"
+path="res://.godot/imported/taruchan_rigged.glb-b772ca829b0edb3aafa5011c047039f9.scn"
 
 [deps]
 
-source_file="res://models/taruchan/Meshy_AI_taruchan4_All_Animations.glb"
-dest_files=["res://.godot/imported/Meshy_AI_taruchan4_All_Animations.glb-e14e31628c23b2f520876759e11c7246.scn"]
+source_file="res://models/taruchan/taruchan_rigged.glb"
+dest_files=["res://.godot/imported/taruchan_rigged.glb-b772ca829b0edb3aafa5011c047039f9.scn"]
 
 [params]
 
