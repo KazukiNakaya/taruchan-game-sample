@@ -11,13 +11,13 @@
 ## Step一覧
 
 - [x] **Step 0 準備** (`step0/setup`): フォルダ作成、入力マップ追加、Meshy元データを `models/_source/`(.gdignore)へ退避、.gitignore整理
-- [ ] **Step 1 歩ける (M1)** (`step1/walk`): テスト平面、たるちゃん移動、追従カメラ、待機/歩きアニメ。確認: WASD/パッドで歩ける
+- [x] **Step 1 歩ける (M1)** (`step1/walk`): テスト平面、たるちゃん移動、追従カメラ、待機/歩きアニメ。確認: WASD/パッドで歩ける
 - [ ] **Step 2 見る (M2)** (`step2/head-look`): LookAtModifier3D、左右非対称の可動域、きょろきょろ。最初に固定ターゲットで首の検証
 - [ ] **Step 3 嗅ぐ (M3)** (`step3/sniff`): TreasureData、におい検出、クンクン長押し、リザルト
 - [ ] **Step 4 森になる (M4)** (`step4/forest`): 森の小道、ライト、フォグ、足音
 - [ ] **Step 5 残る (M5)** (`step5/diary`): 日記、図鑑、セーブ
 
 ## 既知の課題
-- **現在の `walk` アニメは壊れている**: Godotでは `walk-loop` が `walk`(8秒)として読まれる。Hipsトラックにスケール0.64・レストと合わない位置が入っており、再生すると体が起き上がる。レスト姿勢は正常。Step 1 の見た目確認の前に、Blenderで首振りなし24fの歩きを書き出し直す必要がある
+- 使用モデルは `models/taruchan/taruchan_light_walk.glb`(軽量版・歩き `walk` 1秒ループ、ボーン28本・小文字名 `root`/`hips` など)。旧 `taruchan_rigged.glb` はボーン名が異なる。以降のStepのボーン名はこのモデル基準にする
 - `walk-loop` は首振り焼き込みの192fのまま。首振りなし24fへ差し替え予定(アニメ名は同じ)
 - 待機・小走り・クンクン・おすわり・掘るアニメは未作成
