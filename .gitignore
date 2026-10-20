@@ -5,3 +5,6 @@
 # Blender バックアップ・ログ
 *.blend1
 blender_work/*.txt
+
+# 作業用バックアップ
+_backup/
