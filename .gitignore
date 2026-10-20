@@ -4,9 +4,8 @@
 
 # Blender バックアップ・ログ
 *.blend1
-blender_work/*.txt
+blender_movie/*.txt
 
 # 作業用バックアップ
 _backup/
 models/_source/
-blender_work/_check/
