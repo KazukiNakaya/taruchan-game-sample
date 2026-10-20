@@ -18,12 +18,17 @@ const ANIM_BASE_SPEED: float = 0.32
 const GRAVITY: float = 9.8
 const WALK_ANIM: StringName = &"walk"
 
+## 立ち止まっているとき、注目先が首の可動域を超えた分だけ体を向ける速さ
+@export var look_turn_speed: float = 1.5
+
 @onready var _anim: AnimationPlayer = $Model/AnimationPlayer
+@onready var _head_look: HeadLook = $HeadLook
 
 
 func _ready() -> void:
 	_anim.play(WALK_ANIM)
 	_anim.speed_scale = 0.0
+	_head_look.setup(self, $Model)
 
 
 func _physics_process(delta: float) -> void:
@@ -42,6 +47,9 @@ func _physics_process(delta: float) -> void:
 	if direction != Vector3.ZERO:
 		var target_yaw := atan2(-direction.x, -direction.z)
 		rotation.y = lerp_angle(rotation.y, target_yaw, 1.0 - exp(-turn_speed * delta))
+	elif _head_look.body_turn_hint > 0.0:
+		# 左側の注目先は首だけでは届かないので、体ごと少し向ける
+		rotation.y += _head_look.body_turn_hint * minf(look_turn_speed * delta, 1.0)
 
 	move_and_slide()
 	_update_animation(horizontal.length())
