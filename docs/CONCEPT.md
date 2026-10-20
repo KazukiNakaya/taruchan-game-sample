@@ -133,7 +133,7 @@ taruchan-game-sample/
 └─ audio/
 ```
 
-`blender_work/` は `.gdignore` 入りの制作用フォルダなので、Godotからは見えない。
+`blender_movie/`(動画関連)と `models/_blend/`(モデル・アニメのBlender作業ファイル)は `.gdignore` 入りの制作用フォルダなので、Godotからは見えない。
 
 ### 8.3 プレイヤー(たるちゃん)
 
@@ -218,7 +218,8 @@ FollowCamera (Node3D, top_level)  ← プレイヤー位置を遅れて追従
 | `models/taruchan/taruchan_rigged.glb` | **インポートする(これだけ使う)** | たるちゃん本体。メッシュ+テクスチャ埋め込み+ボーン27本+アニメ `walk-loop` |
 | `models/taruchan/Meshy_AI_taruchan4_All_Animations.glb` | インポートしない | Meshy の元データ(実寸約2mm、ボーン長が壊れている)。インポート設定で **Keep File (No Import)** にするか、`models/_source/` などに移して `.gdignore` を置く |
 | `models/taruchan/Meshy_AI_taruchan4_All_Animations_texture_0.png` | インポートしない | 元GLBのテクスチャ。`taruchan_rigged.glb` には埋め込み済みなので不要 |
-| `blender_work/` 以下すべて | Godotからは見えない | `.gdignore` 入り。Blenderの作業ファイルと動画 |
+| `blender_movie/` 以下すべて | Godotからは見えない | `.gdignore` 入り。動画関連(`taruchan_sanpo.blend` とmp4)のみ |
+| `models/_blend/` 以下すべて | Godotからは見えない | `.gdignore` 入り。モデル・アニメのBlender作業ファイル |
 
 **`taruchan_rigged.glb` のインポート設定**
 - アニメーション `walk-loop` は名前の `-loop` 接尾辞で自動的にループ(Linear)になる。詳細インポート設定で念のため確認する。
@@ -233,7 +234,7 @@ FollowCamera (Node3D, top_level)  ← プレイヤー位置を遅れて追従
 | 歩き `walk-loop` | 🔧 書き出し直し中 | 現在のGLBには動画用の首振りが焼き込まれた192fループが入っている。**首振りなしの24fループ(Meshy元データの歩き)に差し替える**。差し替え後のアニメ名も `walk-loop` |
 | 待機 | ❌ | 呼吸・耳の小さな動き |
 | 小走り | ❌ | |
-| クンクン(地面を嗅ぐ) | ❌ | 動画用の `sanpo` アクション(`blender_work/taruchan_sanpo.blend`)の嗅ぐ部分を切り出して流用できる |
+| クンクン(地面を嗅ぐ) | ❌ | 動画用の `sanpo` アクション(`blender_movie/taruchan_sanpo.blend`)の嗅ぐ部分を切り出して流用できる |
 | おすわり / 掘る | ❌ | |
 | 森の背景 | △ | 動画用の森は Blender 内で生成したもの。Godot用には木・岩・草を個別glbで用意し、MultiMeshで配置 |
 | いいもの 5種 | ❌ | Meshy で作成 |
@@ -281,13 +282,16 @@ M1〜M3 で「遊べるMVP」。M2 の首の動きがこのゲームの手触り
 - 首は「向くときも戻るときもゆっくり」が必須。急に戻ると一瞬で違和感が出る。動画では臨界減衰のばね(バネ定数 0.01〜0.02/フレーム)でなめらかにした。
 - 首の回転は **head 7 : chest 3** に分けると自然。下を嗅ぐときは胸も最大3割ほど下げ、前足(`frontleg` `R_frontleg`)を逆回転させて地面から浮かないようにした。
 
-### 12.4 Blender側のファイル(`blender_work/`)
+### 12.4 Blender側のファイル
+動画用は `blender_movie/`、モデル・アニメの作業ファイルは `models/_blend/` に置く。
+
 | ファイル | 内容 |
 |---|---|
-| `taruchan_rig.blend` | リグ調整済みのたるちゃん(Godot用GLBの元) |
-| `taruchan_sanpo.blend` | 動画「たるちゃんのおさんぽ」一式。森・カメラ4カット・蝶々。演技はアクション `sanpo`(歩く→止まって花を嗅ぐ→蝶々を見上げる→歩き去る、456f) |
-| `taruchan_sanpo_0000-0455.mp4` | 上記の動画(1280×720、19秒) |
-| `taruchan_walk_v2_0000-0191.mp4` | 首振り付き歩行の確認用動画 |
+| `models/_blend/taruchan_light_rig.blend` | 現行モデル `taruchan_light_walk.glb` の元(歩き・ジャンプのアニメ入り) |
+| `models/_blend/taruchan_rig.blend` | 旧リグ(旧 `taruchan_rigged.glb` の元) |
+| `blender_movie/taruchan_sanpo.blend` | 動画「たるちゃんのおさんぽ」一式。森・カメラ4カット・蝶々。演技はアクション `sanpo`(歩く→止まって花を嗅ぐ→蝶々を見上げる→歩き去る、456f) |
+| `blender_movie/taruchan_sanpo_0000-0455.mp4` | 上記の動画(1280×720、19秒) |
+| `blender_movie/taruchan_walk_v2_0000-0191.mp4` | 首振り付き歩行の確認用動画 |
 
 ### 12.5 Blender 5.2 で引っかかった点
 - F-Curve の Cycles モディファイアでのループが、この作業では効かなかった。ループさせたいアニメは**全フレームを焼き込む**。
