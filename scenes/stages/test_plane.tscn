@@ -1,7 +1,19 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/taruchan.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/camera/follow_camera.tscn" id="2_camera"]
+[ext_resource type="Script" path="res://scripts/stages/stage.gd" id="3_stage"]
+[ext_resource type="Script" path="res://scripts/stages/goal.gd" id="4_goal"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/result.tscn" id="6_result"]
+[ext_resource type="PackedScene" path="res://scenes/items/treasure.tscn" id="7_treasure"]
+[ext_resource type="Script" path="res://scripts/items/treasure_spawner.gd" id="8_spawner"]
+[ext_resource type="Script" path="res://scripts/items/treasure_data.gd" id="9_tdata"]
+[ext_resource type="Resource" path="res://data/treasures/acorn.tres" id="10_a"]
+[ext_resource type="Resource" path="res://data/treasures/branch.tres" id="10_b"]
+[ext_resource type="Resource" path="res://data/treasures/tennis_ball.tres" id="10_c"]
+[ext_resource type="Resource" path="res://data/treasures/bone_treat.tres" id="10_d"]
+[ext_resource type="Resource" path="res://data/treasures/four_leaf.tres" id="10_e"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(60, 1, 60)
@@ -23,6 +35,17 @@ albedo_color = Color(0.6, 0.45, 0.3, 1)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_goal"]
+size = Vector3(1.5, 1, 1.5)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_goal"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_goal"]
+albedo_color = Color(1, 0.85, 0.3, 1)
+
 [sub_resource type="Sky" id="Sky_main"]
 sky_material = SubResource("ProceduralSkyMaterial_sky")
 
@@ -31,14 +54,12 @@ background_mode = 2
 sky = SubResource("Sky_main")
 ambient_light_source = 3
 
-[sub_resource type="SphereMesh" id="SphereMesh_look"]
-radius = 0.06
-height = 0.12
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_look"]
-albedo_color = Color(1, 0.3, 0.3, 1)
-
-[node name="TestPlane" type="Node3D"]
+[node name="TestPlane" type="Node3D" node_paths=PackedStringArray("player", "goal", "hud")]
+script = ExtResource("3_stage")
+player = NodePath("Taruchan")
+goal = NodePath("Goal")
+hud = NodePath("Hud")
+result_scene = ExtResource("6_result")
 
 [node name="Ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -70,21 +91,6 @@ shape = SubResource("BoxShape3D_block")
 mesh = SubResource("BoxMesh_block")
 surface_material_override/0 = SubResource("StandardMaterial3D_block")
 
-[node name="LookBall1" type="MeshInstance3D" parent="." groups=["look_target"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.1, -1.0)
-mesh = SubResource("SphereMesh_look")
-surface_material_override/0 = SubResource("StandardMaterial3D_look")
-
-[node name="LookBall2" type="MeshInstance3D" parent="." groups=["look_target"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.1, -1.0)
-mesh = SubResource("SphereMesh_look")
-surface_material_override/0 = SubResource("StandardMaterial3D_look")
-
-[node name="LookBall3" type="MeshInstance3D" parent="." groups=["look_target"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.1, -2.5)
-mesh = SubResource("SphereMesh_look")
-surface_material_override/0 = SubResource("StandardMaterial3D_look")
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_main")
 
@@ -97,3 +103,53 @@ camera = NodePath("../FollowCamera")
 
 [node name="FollowCamera" parent="." node_paths=PackedStringArray("target") instance=ExtResource("2_camera")]
 target = NodePath("../Taruchan")
+
+[node name="Goal" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_goal")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -18)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Goal"]
+shape = SubResource("BoxShape3D_goal")
+
+[node name="Post" type="MeshInstance3D" parent="Goal"]
+mesh = SubResource("CylinderMesh_goal")
+surface_material_override/0 = SubResource("StandardMaterial3D_goal")
+
+[node name="Hud" parent="." instance=ExtResource("5_hud")]
+
+[node name="TreasureSpawner" type="Node" parent="."]
+script = ExtResource("8_spawner")
+treasure_scene = ExtResource("7_treasure")
+treasures = Array[ExtResource("9_tdata")]([ExtResource("10_a"), ExtResource("10_b"), ExtResource("10_c"), ExtResource("10_d"), ExtResource("10_e")])
+
+[node name="SpawnPoint1" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
+
+[node name="SpawnPoint2" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -4)
+
+[node name="SpawnPoint3" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -6)
+
+[node name="SpawnPoint4" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -7)
+
+[node name="SpawnPoint5" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -8)
+
+[node name="SpawnPoint6" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -9)
+
+[node name="SpawnPoint7" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -11)
+
+[node name="SpawnPoint8" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -12)
+
+[node name="SpawnPoint9" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -14)
+
+[node name="SpawnPoint10" type="Marker3D" parent="." groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -15)

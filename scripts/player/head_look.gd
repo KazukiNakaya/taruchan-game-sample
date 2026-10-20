@@ -2,11 +2,9 @@ class_name HeadLook
 extends Node
 ## 首の自動追従。注目ターゲット(Marker3D)をゆっくり動かし、LookAtModifier3D で head/chest をそちらへ向ける。
 ##
-## 注目先の優先度: 1. "look_target" グループで近くにあるもの / 2. なければ「きょろきょろ」。
+## 注目先の優先度: 1. SniffSensor が教えるにおいの届く一番近いいいもの / 2. なければ「きょろきょろ」。
 ## 向きは常にたるちゃんのローカル座標(前方は -Z、左は -X)で補間するので、体が回ってもついてくる。
 
-## 注目先を探す半径(m)。Step 3 で SniffSensor に置き換える
-@export var search_radius: float = 3.0
 ## 首(head)の可動域: 右方向の最大角(度)
 @export var head_right_limit_deg: float = 45.0
 ## 首(head)の可動域: 左方向の最大角(度)。モデルの顔が右にねじれているので小さめ
@@ -30,6 +28,7 @@ extends Node
 var body_turn_hint: float = 0.0
 
 var _body: Node3D
+var _sensor: SniffSensor
 var _marker: Marker3D
 var _local_goal: Vector3
 var _local_pos: Vector3
@@ -37,8 +36,9 @@ var _wander_timer: float = 0.0
 var _has_target: bool = false
 
 
-func setup(body: Node3D, model: Node3D) -> void:
+func setup(body: Node3D, model: Node3D, sensor: SniffSensor) -> void:
 	_body = body
+	_sensor = sensor
 	var skeleton := model.find_child("Skeleton3D", true, false) as Skeleton3D
 	assert(skeleton != null, "Skeleton3D が見つかりません")
 
@@ -66,7 +66,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_goal(delta: float) -> void:
-	var target := _find_target()
+	var target: Node3D = _sensor.nearest
 	_has_target = target != null
 	if _has_target:
 		_local_goal = _body.to_local(target.global_position)
@@ -75,21 +75,6 @@ func _update_goal(delta: float) -> void:
 	if _wander_timer <= 0.0:
 		_wander_timer = randf_range(wander_interval.x, wander_interval.y)
 		_local_goal = _pick_wander_point()
-
-
-## "look_target" グループのうち、半径内で一番近いものを返す
-func _find_target() -> Node3D:
-	var best: Node3D = null
-	var best_dist := search_radius
-	for node in get_tree().get_nodes_in_group(&"look_target"):
-		var n := node as Node3D
-		if n == null:
-			continue
-		var dist := _body.global_position.distance_to(n.global_position)
-		if dist < best_dist:
-			best_dist = dist
-			best = n
-	return best
 
 
 func _pick_wander_point() -> Vector3:

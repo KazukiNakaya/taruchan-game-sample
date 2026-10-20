@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TreasureData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/treasure_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"tennis_ball"
+display_name = "テニスボール"
+rarity = 2
+description = "だれかが忘れていったテニスボール。まだ弾む。"
+smell_radius = 3.5
+spawn_weight = 1.5
+shape = 0
+color = Color(0.78, 0.9, 0.2, 1)
+size = 0.12

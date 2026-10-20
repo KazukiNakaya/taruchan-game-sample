@@ -23,16 +23,20 @@ const WALK_ANIM: StringName = &"walk"
 
 @onready var _anim: AnimationPlayer = $Model/AnimationPlayer
 @onready var _head_look: HeadLook = $HeadLook
+@onready var _sniff: SniffSensor = $SniffSensor
 
 
 func _ready() -> void:
 	_anim.play(WALK_ANIM)
 	_anim.speed_scale = 0.0
-	_head_look.setup(self, $Model)
+	_head_look.setup(self, $Model, _sniff)
 
 
 func _physics_process(delta: float) -> void:
-	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	# クンクン中はその場で止まる
+	var input := Vector2.ZERO
+	if not _sniff.is_sniffing:
+		input = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := _camera_relative(input)
 	var target_speed := run_speed if Input.is_action_pressed("run") else walk_speed
 
@@ -52,6 +56,7 @@ func _physics_process(delta: float) -> void:
 		rotation.y += _head_look.body_turn_hint * minf(look_turn_speed * delta, 1.0)
 
 	move_and_slide()
+	GameState.add_distance(horizontal.length() * delta)
 	_update_animation(horizontal.length())
 
 

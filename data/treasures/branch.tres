@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TreasureData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/treasure_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"branch"
+display_name = "木の枝"
+rarity = 1
+description = "ちょうどいい長さの木の枝。くわえたくなる。"
+smell_radius = 3.0
+spawn_weight = 3.0
+shape = 2
+color = Color(0.45, 0.3, 0.18, 1)
+size = 0.2
