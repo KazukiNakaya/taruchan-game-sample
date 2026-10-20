@@ -215,7 +215,7 @@ FollowCamera (Node3D, top_level)  ← プレイヤー位置を遅れて追従
 
 | ファイル | 扱い | 内容 |
 |---|---|---|
-| `models/taruchan/taruchan_rigged.glb` | **インポートする(これだけ使う)** | たるちゃん本体。メッシュ+テクスチャ埋め込み+ボーン27本+アニメ `walk-loop` |
+| `models/taruchan/taruchan_light_walk.glb` | **インポートする(現行モデル)** | たるちゃん本体(軽量版)。ボーン28本(小文字名: `root` `hips` `chest` `neck` `head` など)+アニメ `walk`(1秒ループ)、`jump_start` `jump_air` `jump_land`。旧 `taruchan_rigged.glb`(ボーン27本)は使っていない |
 | `models/taruchan/Meshy_AI_taruchan4_All_Animations.glb` | インポートしない | Meshy の元データ(実寸約2mm、ボーン長が壊れている)。インポート設定で **Keep File (No Import)** にするか、`models/_source/` などに移して `.gdignore` を置く |
 | `models/taruchan/Meshy_AI_taruchan4_All_Animations_texture_0.png` | インポートしない | 元GLBのテクスチャ。`taruchan_rigged.glb` には埋め込み済みなので不要 |
 | `blender_movie/` 以下すべて | Godotからは見えない | `.gdignore` 入り。動画関連(`taruchan_sanpo.blend` とmp4)のみ |
