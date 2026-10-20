@@ -9,5 +9,4 @@ blender_work/*.txt
 # 作業用バックアップ
 _backup/
 models/_source/
-models/env/
 blender_work/_check/
