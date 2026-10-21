@@ -8,7 +8,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
-func show_result(found: Array[TreasureData], elapsed: float, distance: float) -> void:
+func show_result(found: Array[TreasureData], elapsed: float, distance: float, new_ids: PackedStringArray) -> void:
 	var panel := PanelContainer.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	add_child(panel)
@@ -23,12 +23,17 @@ func show_result(found: Array[TreasureData], elapsed: float, distance: float) ->
 	if found.is_empty():
 		box.add_child(_label("(なにも見つからなかった… また今度!)", 20))
 	for data in found:
-		box.add_child(_label("%s  %s" % [data.stars(), data.display_name], 20))
+		var mark := "   ✨はじめて!" if new_ids.has(String(data.id)) else ""
+		box.add_child(_label("%s  %s%s" % [data.stars(), data.display_name, mark], 20))
 
 	var again := Button.new()
 	again.text = "もういちど さんぽする"
 	again.pressed.connect(_on_again_pressed)
 	box.add_child(again)
+	var to_title := Button.new()
+	to_title.text = "タイトルにもどる"
+	to_title.pressed.connect(_on_title_pressed)
+	box.add_child(to_title)
 	var quit := Button.new()
 	quit.text = "おわる"
 	quit.pressed.connect(func() -> void: get_tree().quit())
@@ -49,3 +54,8 @@ func _label(text: String, size: int) -> Label:
 func _on_again_pressed() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+
+
+func _on_title_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main.tscn")

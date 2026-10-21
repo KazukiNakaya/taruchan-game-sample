@@ -3,7 +3,6 @@ extends Node
 ## "spawn_points" グループの Marker3D から、重み付き抽選でいいものを配置する。
 
 @export var treasure_scene: PackedScene
-@export var treasures: Array[TreasureData] = []
 ## 配置する数(スポーン地点より多くは置けない)
 @export var count: int = 5
 
@@ -24,6 +23,7 @@ func spawn() -> void:
 
 
 func _pick() -> TreasureData:
+	var treasures := GameState.CATALOG.treasures
 	var total := 0.0
 	for data in treasures:
 		total += data.spawn_weight

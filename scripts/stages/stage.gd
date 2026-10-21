@@ -7,18 +7,25 @@ extends Node3D
 @export var hud: Hud
 @export var result_scene: PackedScene
 
+const MENU_SCENE := preload("res://scenes/ui/menu.tscn")
+
+var _menu: Menu
+
 
 func _ready() -> void:
 	GameState.start_walk()
 	var sensor := player.get_node("SniffSensor") as SniffSensor
 	sensor.treasure_found.connect(GameState.add_found)
 	hud.bind(sensor)
+	_menu = MENU_SCENE.instantiate() as Menu
+	add_child(_menu)
 	goal.reached.connect(_on_goal_reached, CONNECT_ONE_SHOT)
 
 
 func _on_goal_reached() -> void:
+	_menu.enabled = false
 	GameState.finish_walk()
 	var result := result_scene.instantiate() as Result
 	add_child(result)
-	result.show_result(GameState.found, GameState.elapsed, GameState.distance)
+	result.show_result(GameState.found, GameState.elapsed, GameState.distance, GameState.last_new_ids)
 	get_tree().paused = true
