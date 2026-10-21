@@ -9,12 +9,6 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/result.tscn" id="7_result"]
 [ext_resource type="PackedScene" path="res://scenes/items/treasure.tscn" id="8_treasure"]
 [ext_resource type="Script" path="res://scripts/items/treasure_spawner.gd" id="9_spawner"]
-[ext_resource type="Script" path="res://scripts/items/treasure_data.gd" id="10_tdata"]
-[ext_resource type="Resource" path="res://data/treasures/acorn.tres" id="11_a"]
-[ext_resource type="Resource" path="res://data/treasures/branch.tres" id="11_b"]
-[ext_resource type="Resource" path="res://data/treasures/tennis_ball.tres" id="11_c"]
-[ext_resource type="Resource" path="res://data/treasures/bone_treat.tres" id="11_d"]
-[ext_resource type="Resource" path="res://data/treasures/four_leaf.tres" id="11_e"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(60, 1, 100)
@@ -110,7 +104,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_goal")
 [node name="TreasureSpawner" type="Node" parent="."]
 script = ExtResource("9_spawner")
 treasure_scene = ExtResource("8_treasure")
-treasures = Array[ExtResource("10_tdata")]([ExtResource("11_a"), ExtResource("11_b"), ExtResource("11_c"), ExtResource("11_d"), ExtResource("11_e")])
 count = 5
 
 [node name="SpawnPoint1" type="Marker3D" parent="." groups=["spawn_points"]]

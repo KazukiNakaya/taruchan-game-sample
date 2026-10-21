@@ -15,7 +15,7 @@
 - [x] **Step 2 見る (M2)** (`step2/head-look`): LookAtModifier3D、左右非対称の可動域、きょろきょろ。最初に固定ターゲットで首の検証
 - [x] **Step 3 嗅ぐ (M3)** (`step3/sniff`): TreasureData、におい検出、クンクン長押し、リザルト
 - [x] **Step 4 森になる (M4)** (`step4/forest`): 森の小道、ライト、フォグ、足音
-- [ ] **Step 5 残る (M5)** (`step5/diary`): 日記、図鑑、セーブ
+- [x] **Step 5 残る (M5)** (`step5/diary`): 日記、図鑑、セーブ
 
 ## 既知の課題
 - 使用モデルは `models/taruchan/taruchan_light_walk.glb`(軽量版・歩き `walk` 1秒ループ、ボーン28本・小文字名 `root`/`hips` など)。旧 `taruchan_rigged.glb` はボーン名が異なる。以降のStepのボーン名はこのモデル基準にする
@@ -30,3 +30,6 @@
 - Step 4: 森は仮のローポリ(`ForestBuilder` が起動時に木・岩・草・小道・葉っぱだまりを生成)。メインシーンは `scenes/stages/forest_path.tscn`(小道約40m)。木・岩・草のglbができたら差し替える。`test_plane.tscn` は動作確認用に残す
 - Step 4: 足音は Godot に付属の効果音がないため、ノイズから生成したWAV(`audio/footsteps/`、土/草/葉っぱ×3種)を仮素材として使用。足元の地面は `ForestBuilder.surface_at()` で判定。素材が用意できたら同名で差し替える
 - Step 4: 鳥の声・BGM・クンクン音・発見ジングル、木漏れ日(ボリュメトリックフォグ等)は未実装
+- Step 5: 起動シーンは `scenes/main.tscn`(タイトル: はじめる/にっき・ずかん/おわる)。メニューは Tab(パッドは Start)で開閉、開いている間はゲームを止める。Esc の割り当ては廃止
+- Step 5: セーブは `user://save.tres`(図鑑の解放状況と日記)。ゴール到達でおさんぽ1回ぶんを日記に追加して保存する(途中で終了した分は保存されない)。Windowsでは `%APPDATA%\Godotpp_userdata	aruchan-game-sample\`
+- Step 5: 図鑑の未発見は「？？？」の暗い表示(シルエット画像は未対応)。いいものの全種類は `data/treasure_catalog.tres` が唯一の一覧(配置の抽選と図鑑で共用)
