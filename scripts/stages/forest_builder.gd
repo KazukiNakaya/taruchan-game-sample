@@ -4,14 +4,14 @@ extends Node3D
 ## 小道は z=0(入口)から z=-length(ゴール)へ、ゆるく蛇行する。
 
 @export var random_seed: int = 7
-## 小道の長さ(m)。歩いて約2〜3分
-@export var length: float = 80.0
+## 小道の長さ(m)。歩いて約1分
+@export var length: float = 40.0
 ## 小道の半幅(m)
 @export var path_half_width: float = 1.2
-@export var tree_count: int = 150
-@export var rock_count: int = 24
-@export var grass_count: int = 1400
-@export var leaf_patch_count: int = 7
+@export var tree_count: int = 80
+@export var rock_count: int = 14
+@export var grass_count: int = 750
+@export var leaf_patch_count: int = 4
 
 const WALL_X: float = 19.0
 const TREE_MIN_DIST: float = 2.8
@@ -23,7 +23,7 @@ var _leaf_patches: Array[Vector3] = []  # x, z, 半径
 
 ## 小道の中心線の x 座標
 static func path_x(z: float) -> float:
-	return 4.0 * sin(z / 18.0)
+	return 3.5 * sin(z / 9.0)
 
 
 func _ready() -> void:

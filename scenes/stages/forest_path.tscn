@@ -17,10 +17,10 @@
 [ext_resource type="Resource" path="res://data/treasures/four_leaf.tres" id="11_e"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(60, 1, 160)
+size = Vector3(60, 1, 100)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(60, 1, 160)
+size = Vector3(60, 1, 100)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.3, 0.45, 0.22, 1)
@@ -64,7 +64,7 @@ hud = NodePath("Hud")
 result_scene = ExtResource("7_result")
 
 [node name="Ground" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -15)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
 shape = SubResource("BoxShape3D_ground")
@@ -93,7 +93,7 @@ camera = NodePath("../FollowCamera")
 target = NodePath("../Taruchan")
 
 [node name="Goal" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.857, 0.5, -80)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.375, 0.5, -40)
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("5_goal")
@@ -111,46 +111,28 @@ surface_material_override/0 = SubResource("StandardMaterial3D_goal")
 script = ExtResource("9_spawner")
 treasure_scene = ExtResource("8_treasure")
 treasures = Array[ExtResource("10_tdata")]([ExtResource("11_a"), ExtResource("11_b"), ExtResource("11_c"), ExtResource("11_d"), ExtResource("11_e")])
-count = 6
+count = 5
 
 [node name="SpawnPoint1" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.394, 0, -6.095)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.837, 0, -3.803)
 
 [node name="SpawnPoint2" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.460, 0, -10.290)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.010, 0, -7.792)
 
 [node name="SpawnPoint3" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.253, 0, -15.976)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.485, 0, -12.558)
 
 [node name="SpawnPoint4" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.573, 0, -21.393)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.936, 0, -16.859)
 
 [node name="SpawnPoint5" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.895, 0, -25.219)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.548, 0, -21.410)
 
 [node name="SpawnPoint6" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.901, 0, -31.208)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.901, 0, -26.382)
 
 [node name="SpawnPoint7" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.655, 0, -35.769)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.368, 0, -31.147)
 
 [node name="SpawnPoint8" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.230, 0, -40.337)
-
-[node name="SpawnPoint9" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.056, 0, -46.620)
-
-[node name="SpawnPoint10" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.374, 0, -50.444)
-
-[node name="SpawnPoint11" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.298, 0, -55.315)
-
-[node name="SpawnPoint12" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.752, 0, -61.000)
-
-[node name="SpawnPoint13" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.043, 0, -66.444)
-
-[node name="SpawnPoint14" type="Marker3D" parent="." groups=["spawn_points"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.113, 0, -71.369)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.181, 0, -35.075)
