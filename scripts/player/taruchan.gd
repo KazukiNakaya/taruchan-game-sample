@@ -13,22 +13,23 @@ extends CharacterBody3D
 ## 移動方向の基準にするカメラ(FollowCamera)
 @export var camera: Node3D
 
-## 歩きアニメが足滑りしない速度(m/s)
-const ANIM_BASE_SPEED: float = 0.32
+## ジャンプの高さ(m)。体高 約0.4 m に対して控えめ
+@export var jump_height: float = 0.35
+## 空中での横移動のしやすさ(1 で地上と同じ)
+@export_range(0.0, 1.0) var air_control: float = 0.6
+
 const GRAVITY: float = 9.8
-const WALK_ANIM: StringName = &"walk"
 
 ## 立ち止まっているとき、注目先が首の可動域を超えた分だけ体を向ける速さ
 @export var look_turn_speed: float = 1.5
 
-@onready var _anim: AnimationPlayer = $Model/AnimationPlayer
+@onready var _animator: TaruchanAnimator = $Animator
 @onready var _head_look: HeadLook = $HeadLook
 @onready var _sniff: SniffSensor = $SniffSensor
 
 
 func _ready() -> void:
-	_anim.play(WALK_ANIM)
-	_anim.speed_scale = 0.0
+	_animator.setup($Model/AnimationPlayer)
 	_head_look.setup(self, $Model, _sniff)
 
 
@@ -43,10 +44,18 @@ func _physics_process(delta: float) -> void:
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	var target_velocity := direction * target_speed * minf(input.length(), 1.0)
 	var rate := acceleration if direction != Vector3.ZERO else deceleration
+	if not is_on_floor():
+		rate *= air_control
 	horizontal = horizontal.move_toward(target_velocity, rate * delta)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
-	velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
+	if is_on_floor() and velocity.y <= 0.0:
+		velocity.y = 0.0
+		if Input.is_action_just_pressed("jump") and not _sniff.is_sniffing:
+			velocity.y = sqrt(2.0 * GRAVITY * jump_height)
+			_animator.start_jump()
+	else:
+		velocity.y -= GRAVITY * delta
 
 	if direction != Vector3.ZERO:
 		var target_yaw := atan2(-direction.x, -direction.z)
@@ -57,7 +66,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	GameState.add_distance(horizontal.length() * delta)
-	_update_animation(horizontal.length())
+	_animator.update(delta, is_on_floor(), horizontal.length(), Input.is_action_pressed("run"))
 
 
 ## 入力ベクトルをカメラの向き(水平成分のみ)基準のワールド方向に変換する
@@ -66,8 +75,3 @@ func _camera_relative(input: Vector2) -> Vector3:
 		return Vector3.ZERO
 	var yaw := camera.global_rotation.y if camera else 0.0
 	return Vector3(input.x, 0.0, input.y).rotated(Vector3.UP, yaw).normalized()
-
-
-## 移動速度に合わせて歩きアニメの再生速度を決める(止まったら一時停止)
-func _update_animation(speed: float) -> void:
-	_anim.speed_scale = speed / ANIM_BASE_SPEED
