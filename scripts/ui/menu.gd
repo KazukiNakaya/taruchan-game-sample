@@ -1,6 +1,6 @@
 class_name Menu
 extends CanvasLayer
-## おさんぽ日記と図鑑のメニュー。Tab(パッドは Start)で開閉する。
+## おさんぽ日記と図鑑のメニュー。Tab / Esc(パッドは Start)で開閉する。
 
 signal closed
 
@@ -74,9 +74,25 @@ func _build_ui() -> void:
 	_book_box = _add_scroll_tab("ずかん")
 
 	var close_button := Button.new()
-	close_button.text = "とじる (Tab)"
+	close_button.text = "とじる (Tab / Esc)"
 	close_button.pressed.connect(close)
 	box.add_child(close_button)
+
+	# おさんぽ中だけ、タイトルへ戻る/終了を出す(途中のおさんぽは日記に保存されない)
+	if pause_game:
+		var to_title := Button.new()
+		to_title.text = "タイトルにもどる (このおさんぽは きろくされません)"
+		to_title.pressed.connect(_on_title_pressed)
+		box.add_child(to_title)
+		var quit := Button.new()
+		quit.text = "おわる"
+		quit.pressed.connect(func() -> void: get_tree().quit())
+		box.add_child(quit)
+
+
+func _on_title_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
 func _add_scroll_tab(title: String) -> VBoxContainer:
