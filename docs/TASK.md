@@ -23,7 +23,7 @@
 
 ## これからのStep
 
-- [ ] **Step 6 動きを増やす** (`step6/movement`): アニメの状態管理(待機/歩き/小走り/ジャンプ)、小走り(Shift)のアニメ連動、ジャンプ(Space/パッドB: jump_start→jump_air→jump_land)、`jump` 入力マップ追加。本番アニメ用のBlender作成プロンプト(`docs/BLENDER_ANIM_PROMPT.md`)を用意し、アニメ名が届いたら自動で差し替わるようにする(`has_animation` で判定)
+- [x] **Step 6 動きを増やす** (`step6/movement`): アニメの状態管理(待機/歩き/小走り/ジャンプ)、小走り(Shift)のアニメ連動、ジャンプ(Space/パッドB: jump_start→jump_air→jump_land)、`jump` 入力マップ追加。本番アニメ用のBlender作成プロンプト(`docs/BLENDER_ANIM_PROMPT.md`)を用意し、アニメ名が届いたら自動で差し替わるようにする(`has_animation` で判定)
   - 確認: 止まる/歩く/走る/跳ぶの切り替えが滑らか、着地後に歩きへ戻る
 - [ ] **Step 7 しっぽとクンクン** (`step7/tail-sniff`): しっぽ振り(`tail_1`〜`tail_3` を SkeletonModifier3D で揺らす。待機=ゆっくり、においに近づくほど速く、発見時は大きく)、クンクン中は首と胸を下げて地面を見る(仮)、カメラが少し寄る、発見時に土が舞う演出(掘る仮演出)
   - 確認: においに近づくとしっぽが速くなる、クンクンで頭が下がる

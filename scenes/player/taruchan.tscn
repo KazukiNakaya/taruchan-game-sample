@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/taruchan.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://models/taruchan/taruchan_light_walk.glb" id="2_model"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/player/sniff_sensor.gd" id="4_sniff"]
 
 [ext_resource type="Script" path="res://scripts/player/footsteps.gd" id="5_foot"]
+
+[ext_resource type="Script" path="res://scripts/player/taruchan_animator.gd" id="6_anim"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_smell"]
 radius = 4.0
@@ -41,3 +43,6 @@ shape = SubResource("SphereShape3D_smell")
 
 [node name="Footsteps" type="Node" parent="."]
 script = ExtResource("5_foot")
+
+[node name="Animator" type="Node" parent="."]
+script = ExtResource("6_anim")
