@@ -42,7 +42,7 @@
 - ステージ追加(公園、海辺)
 
 ## メモ(現状・既知の課題)
-- 使用モデルは `models/taruchan/taruchan_light_walk.glb`(ボーン28本・小文字名 `root`/`hips`/`chest`/`neck`/`head`/`tail_1`〜`tail_3` など)。アニメは `walk`(1秒ループ)と `jump_start`/`jump_air`(ループ)/`jump_land` のみ。待機・小走り・クンクン・おすわり・掘るは未作成
+- 使用モデルは `models/taruchan/taruchan_light_walk.glb`(ボーン28本・小文字名 `root`/`hips`/`chest`/`neck`/`head`/`tail_1`〜`tail_3` など)。アニメは `walk`(1秒ループ)、`jump_start`/`jump_air`(ループ)/`jump_land`、`idle`(2秒ループ)、`run`(0.5秒ループ)、`sniff`(1.5秒ループ)、`sit_start`/`sit_idle`(ループ)/`sit_end`、`dig`(0.58秒ループ)。`TaruchanAnimator` は idle/run を自動で使う(小走りアニメの基準速度 `RUN_ANIM_SPEED` = 0.9 m/s は実機で足滑りを見て調整)
 - 首の可動域(右45°/左20°、上35°/下45°)と追従速度は `HeadLook` のエクスポート変数。`LookAtModifier3D` は head の forward=+Y、回転軸=Z。胸(chest)にも影響度0.3で適用。左の可動域を超える注目先は、立ち止まっているとき体ごと向く
 - いいもの5種(どんぐり/木の枝/テニスボール/骨のおやつ/四つ葉)は仮の形(色違いプリミティブ)。`data/treasures/*.tres` の `scene` に Meshy 製を設定すれば差し替えられる。全種類の一覧は `data/treasure_catalog.tres`(配置の抽選と図鑑で共用)
 - 森は仮のローポリ(`ForestBuilder` が起動時に生成)。メインシーンは `scenes/main.tscn`(タイトル)から `scenes/stages/forest_path.tscn`(小道約40m)。`test_plane.tscn` は動作確認用に残す
