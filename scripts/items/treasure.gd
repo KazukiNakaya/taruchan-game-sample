@@ -26,6 +26,7 @@ func discover() -> void:
 	_visual.position = Vector3(0.0, -data.size, 0.0)
 	_visual.scale = Vector3.ONE * 0.3
 	_visual.visible = true
+	_spawn_dirt()
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(_visual, "position:y", data.size * 0.6, 0.7) \
@@ -35,6 +36,33 @@ func discover() -> void:
 	tween.chain().tween_interval(1.2)
 	tween.chain().tween_property(_visual, "scale", Vector3.ZERO, 0.4)
 	tween.chain().tween_callback(queue_free)
+
+
+## 掘り出したときに土が舞う
+func _spawn_dirt() -> void:
+	var dirt := CPUParticles3D.new()
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.011
+	mesh.height = 0.022
+	mesh.radial_segments = 6
+	mesh.rings = 3
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.42, 0.3, 0.2)
+	mesh.material = material
+	dirt.mesh = mesh
+	dirt.amount = 22
+	dirt.lifetime = 0.8
+	dirt.one_shot = true
+	dirt.explosiveness = 1.0
+	dirt.direction = Vector3.UP
+	dirt.spread = 55.0
+	dirt.initial_velocity_min = 0.6
+	dirt.initial_velocity_max = 1.4
+	dirt.gravity = Vector3(0.0, -6.0, 0.0)
+	dirt.scale_amount_min = 0.6
+	dirt.scale_amount_max = 1.4
+	add_child(dirt)
+	dirt.emitting = true
 
 
 func _build_visual() -> void:

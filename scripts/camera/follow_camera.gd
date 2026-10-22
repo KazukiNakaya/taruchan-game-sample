@@ -11,13 +11,21 @@ extends Node3D
 @export var stick_sensitivity: float = 2.5
 @export var min_pitch_deg: float = -60.0
 @export var max_pitch_deg: float = 30.0
+## クンクン中・掘っている最中に、アームの長さをここまで縮めて寄る(m)
+@export var focus_length: float = 1.1
+## 寄る/戻る速さ
+@export var focus_speed: float = 4.0
 
 var _yaw: float = 0.0
 var _pitch: float = deg_to_rad(-15.0)
+var _base_length: float
+
+@onready var _arm: SpringArm3D = $SpringArm3D
 
 
 func _ready() -> void:
 	top_level = true
+	_base_length = _arm.spring_length
 	if target:
 		global_position = target.global_position + Vector3.UP * height_offset
 		_yaw = target.global_rotation.y
@@ -36,6 +44,9 @@ func _process(delta: float) -> void:
 	_yaw -= stick.x * stick_sensitivity * delta
 	_pitch -= stick.y * stick_sensitivity * delta
 	_apply_rotation()
+	var focusing := target is Taruchan and (target as Taruchan).is_focusing()
+	var length := focus_length if focusing else _base_length
+	_arm.spring_length = lerpf(_arm.spring_length, length, 1.0 - exp(-focus_speed * delta))
 	if target:
 		var goal := target.global_position + Vector3.UP * height_offset
 		global_position = global_position.lerp(goal, 1.0 - exp(-follow_speed * delta))
