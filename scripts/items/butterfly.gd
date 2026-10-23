@@ -28,12 +28,18 @@ var _player: Node3D
 var _leave_time: float = 0.0
 
 
-## 案内先のいいものと、待機する場所を決める
-func setup(target_treasure: Treasure, home: Vector3) -> void:
+## 案内先のいいもの、待つ場所、飛んでくる最初の位置を決める
+func setup(target_treasure: Treasure, home: Vector3, start: Vector3) -> void:
 	target = target_treasure
 	_home = home
-	global_position = home
+	global_position = start
 	target.discovered.connect(_on_target_discovered)
+
+
+## たるちゃんの少し前の、蝶々が待つ位置
+static func home_near(player: Node3D) -> Vector3:
+	var forward := Vector3(0.0, 0.0, -1.0).rotated(Vector3.UP, player.global_rotation.y)
+	return player.global_position + forward * 2.5 + Vector3(0.0, 0.8, 0.0)
 
 
 func _ready() -> void:
@@ -54,8 +60,11 @@ func _process(delta: float) -> void:
 	var previous := global_position
 	match state:
 		State.WAIT:
-			global_position = _home + _wobble(0.5)
-			if _player and _flat_distance(_player.global_position) < notice_radius:
+			# 飛んできて、たるちゃんの少し前でひらひら待つ。離れていったら、また前に回り込む
+			if _player and _player.global_position.distance_to(_home) > 5.0:
+				_home = home_near(_player)
+			global_position = global_position.lerp(_home + _wobble(0.5), 1.0 - exp(-1.2 * delta))
+			if _player and _flat_distance(_player.global_position) < notice_radius and global_position.distance_to(_home) < 1.5:
 				state = State.GUIDE
 		State.GUIDE:
 			_guide(delta)
