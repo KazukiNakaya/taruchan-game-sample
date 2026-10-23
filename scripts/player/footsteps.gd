@@ -8,7 +8,7 @@ extends Node
 @export var min_speed: float = 0.05
 @export var volume_db: float = -8.0
 
-const SURFACES: Array[StringName] = [&"dirt", &"grass", &"leaves"]
+const SURFACES: Array[StringName] = [&"dirt", &"grass", &"leaves", &"water"]
 const VARIANTS: int = 3
 
 var _body: CharacterBody3D

@@ -13,10 +13,12 @@ extends CharacterBody3D
 ## 移動方向の基準にするカメラ(FollowCamera)
 @export var camera: Node3D
 
-## ジャンプの高さ(m)。体高 約0.4 m に対して控えめ
-@export var jump_height: float = 0.35
+## ジャンプの高さ(m)。倒木・切り株(約0.26〜0.28m)に乗れる高さ
+@export var jump_height: float = 0.42
 ## 空中での横移動のしやすさ(1 で地上と同じ)
 @export_range(0.0, 1.0) var air_control: float = 0.6
+## 移動しながら跳んだとき、進む向きに足す速さ(m/s)。歩きでも倒木・切り株に乗れるようにする
+@export var jump_forward_boost: float = 0.45
 
 ## 発見したあと、掘る動作を続ける時間(秒)
 @export var dig_time: float = 1.0
@@ -74,6 +76,9 @@ func _physics_process(delta: float) -> void:
 	var rate := acceleration if direction != Vector3.ZERO else deceleration
 	if not is_on_floor():
 		rate *= air_control
+		# 空中では、跳んだときの勢いを落とさない(向きは変えられる)
+		if direction != Vector3.ZERO and horizontal.length() > target_velocity.length():
+			target_velocity = target_velocity.normalized() * horizontal.length()
 	horizontal = horizontal.move_toward(target_velocity, rate * delta)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
@@ -81,6 +86,9 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 		if Input.is_action_just_pressed("jump") and not busy:
 			velocity.y = sqrt(2.0 * GRAVITY * jump_height)
+			var flat := Vector3(velocity.x, 0.0, velocity.z)
+			if flat.length() > 0.1:
+				velocity += flat.normalized() * jump_forward_boost
 			_animator.start_jump()
 			AudioManager.play_sfx(&"jump")
 	else:

@@ -6,21 +6,12 @@
 [ext_resource type="Script" path="res://scripts/stages/forest_builder.gd" id="4_forest"]
 [ext_resource type="PackedScene" path="res://scenes/stages/bench_goal.tscn" id="20_bench"]
 [ext_resource type="Script" path="res://scripts/stages/butterfly_event.gd" id="30_bevent"]
+[ext_resource type="Script" path="res://scripts/stages/jump_features.gd" id="32_jump"]
 [ext_resource type="PackedScene" path="res://scenes/items/butterfly.tscn" id="31_butterfly"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/result.tscn" id="7_result"]
 [ext_resource type="PackedScene" path="res://scenes/items/treasure.tscn" id="8_treasure"]
 [ext_resource type="Script" path="res://scripts/items/treasure_spawner.gd" id="9_spawner"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(60, 1, 100)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(60, 1, 100)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.3, 0.45, 0.22, 1)
-roughness = 1.0
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.45, 0.62, 0.85, 1)
@@ -48,18 +39,12 @@ goal = NodePath("Goal")
 hud = NodePath("Hud")
 result_scene = ExtResource("7_result")
 
-[node name="Ground" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -15)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-shape = SubResource("BoxShape3D_ground")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("BoxMesh_ground")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
-
 [node name="ForestBuilder" type="Node3D" parent="."]
 script = ExtResource("4_forest")
+
+[node name="JumpFeatures" type="Node3D" parent="."]
+script = ExtResource("32_jump")
+treasure_scene = ExtResource("8_treasure")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_main")

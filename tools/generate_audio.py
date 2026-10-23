@@ -177,4 +177,13 @@ while t < SEG * len(chords) - 1.0:
     add_wrap(out, bell(random.choice(scale), 2.2, 0.7, 0.09), int(t * SR))
     t += random.uniform(1.6, 3.2)
 write("audio/bgm/forest_loop.wav", out, 0.5)
+# 後から追加した音は末尾で作る(前の音の乱数の並びを変えないため)
+# ---- 足音: 水(小川の浅瀬。ちゃぷっ) ----
+for v in range(3):
+    n = int(0.22 * SR)
+    e = env(n, 0.004, 0.05)
+    splash = bandpass(noise(n), 0.05, 0.35)
+    bubble = [math.sin(2 * math.pi * (500 + 900 * (i / n) + 150 * v) * i / SR) * math.exp(-i / (0.03 * SR)) for i in range(n)]
+    write(f"audio/footsteps/water_{v + 1}.wav", [e[i] * (splash[i] * 0.9 + bubble[i] * 0.5) for i in range(n)])
+
 print("done")
