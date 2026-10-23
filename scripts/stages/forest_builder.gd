@@ -19,6 +19,7 @@ const TREE_MAX_DIST: float = 12.0
 
 var _rng := RandomNumberGenerator.new()
 var _leaf_patches: Array[Vector3] = []  # x, z, 半径
+var _tree_positions: PackedVector2Array = PackedVector2Array()  # x, z
 
 
 ## 小道の中心線の x 座標
@@ -35,6 +36,14 @@ func _ready() -> void:
 	_build_rocks()
 	_build_grass()
 	_build_walls()
+
+
+## 一番近い木の幹までの距離(m)。置き物が木に重ならないかの判定に使う
+func min_tree_distance(pos: Vector3) -> float:
+	var best := INF
+	for tree in _tree_positions:
+		best = minf(best, Vector2(pos.x, pos.z).distance_to(tree))
+	return best
 
 
 ## 足元の地面の種類(足音の切り替え用): dirt / grass / leaves
@@ -113,6 +122,7 @@ func _build_trees() -> void:
 		var x := path_x(z) + side * _rng.randf_range(TREE_MIN_DIST, TREE_MAX_DIST)
 		var height := _rng.randf_range(3.0, 5.0)
 		var radius := _rng.randf_range(0.12, 0.2)
+		_tree_positions.append(Vector2(x, z))
 
 		var trunk_xf := Transform3D(Basis.from_scale(Vector3(radius, height * 0.5, radius)), Vector3(x, height * 0.25, z))
 		trunks.multimesh.set_instance_transform(i, trunk_xf)
