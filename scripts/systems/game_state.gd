@@ -2,10 +2,14 @@ extends Node
 ## 今回のおさんぽの記録とセーブデータ(autoload: GameState)。
 
 signal treasure_added(data: TreasureData)
+## このおさんぽに置かれたいいものの総数が変わった
+signal total_changed(total: int)
 
 const CATALOG: TreasureCatalog = preload("res://data/treasure_catalog.tres")
 
 var found: Array[TreasureData] = []
+## このおさんぽに置かれたいいものの総数(蝶々の隠しいいものも含む)
+var total_treasures: int = 0
 var elapsed: float = 0.0
 var distance: float = 0.0
 var running: bool = false
@@ -25,6 +29,8 @@ func _process(delta: float) -> void:
 
 func start_walk() -> void:
 	found.clear()
+	total_treasures = 0
+	total_changed.emit(total_treasures)
 	last_new_ids = PackedStringArray()
 	elapsed = 0.0
 	distance = 0.0
@@ -47,6 +53,12 @@ func finish_walk() -> void:
 		save_data.discovered.append(id)
 	save_data.diary.append(entry)
 	save_data.save()
+
+
+## いいものが1つ置かれたら呼ぶ(Treasure が自分で呼ぶ)
+func register_treasure() -> void:
+	total_treasures += 1
+	total_changed.emit(total_treasures)
 
 
 func add_found(data: TreasureData) -> void:

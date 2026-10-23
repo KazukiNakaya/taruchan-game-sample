@@ -19,7 +19,7 @@ func show_result(found: Array[TreasureData], elapsed: float, distance: float, ne
 
 	box.add_child(_label("おさんぽ おしまい", 32))
 	box.add_child(_label("あるいた時間: %d分%02d秒    きょり: %.1f m" % [int(elapsed) / 60, int(elapsed) % 60, distance], 20))
-	box.add_child(_label("みつけたもの (%d)" % found.size(), 24))
+	box.add_child(_label("みつけたもの  %d個中 %d個" % [GameState.total_treasures, found.size()], 24))
 	if found.is_empty():
 		box.add_child(_label("(なにも見つからなかった… また今度!)", 20))
 	for data in found:
