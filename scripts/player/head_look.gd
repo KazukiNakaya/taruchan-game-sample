@@ -2,7 +2,7 @@ class_name HeadLook
 extends Node
 ## 首の自動追従。注目ターゲット(Marker3D)をゆっくり動かし、LookAtModifier3D で head/chest をそちらへ向ける。
 ##
-## 注目先の優先度: 1. SniffSensor が教えるにおいの届く一番近いいいもの / 2. なければ「きょろきょろ」。
+## 注目先の優先度: 1. SniffSensor が教えるにおいの届く一番近いいいもの / 2. 近くの蝶々("look_target" グループ) / 3. なければ「きょろきょろ」。
 ## 向きは常にたるちゃんのローカル座標(前方は -Z、左は -X)で補間するので、体が回ってもついてくる。
 
 ## 首(head)の可動域: 右方向の最大角(度)
@@ -23,6 +23,8 @@ extends Node
 @export var wander_yaw_range_deg: Vector2 = Vector2(-40.0, 20.0)
 ## 注目点の高さ(m)。たるちゃんの目の高さ付近
 @export var look_height: float = 0.3
+## 蝶々などの "look_target" を見る距離(m)
+@export var event_look_radius: float = 6.0
 
 ## 左の可動域を超える注目先があるとき、体を向けたい角度(ラジアン、左が正)。0 なら不要
 var body_turn_hint: float = 0.0
@@ -67,6 +69,8 @@ func _physics_process(delta: float) -> void:
 
 func _update_goal(delta: float) -> void:
 	var target: Node3D = _sensor.nearest
+	if target == null:
+		target = _find_event_target()
 	_has_target = target != null
 	if _has_target:
 		_local_goal = _body.to_local(target.global_position)
@@ -75,6 +79,21 @@ func _update_goal(delta: float) -> void:
 	if _wander_timer <= 0.0:
 		_wander_timer = randf_range(wander_interval.x, wander_interval.y)
 		_local_goal = _pick_wander_point()
+
+
+## "look_target" グループ(蝶々など)のうち、半径内で一番近いもの
+func _find_event_target() -> Node3D:
+	var best: Node3D = null
+	var best_dist := event_look_radius
+	for node in get_tree().get_nodes_in_group(&"look_target"):
+		var n := node as Node3D
+		if n == null:
+			continue
+		var dist := _body.global_position.distance_to(n.global_position)
+		if dist < best_dist:
+			best_dist = dist
+			best = n
+	return best
 
 
 func _pick_wander_point() -> Vector3:
