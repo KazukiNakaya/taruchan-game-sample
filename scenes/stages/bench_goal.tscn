@@ -1,0 +1,78 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/stages/goal.gd" id="1_goal"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_zone"]
+size = Vector3(2.6, 1, 2.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.2, 0.5, 0.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_seat"]
+size = Vector3(1.2, 0.06, 0.42)
+
+[sub_resource type="BoxMesh" id="BoxMesh_back"]
+size = Vector3(1.2, 0.32, 0.05)
+
+[sub_resource type="BoxMesh" id="BoxMesh_leg"]
+size = Vector3(0.05, 0.45, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wood"]
+albedo_color = Color(0.55, 0.38, 0.22, 1)
+roughness = 1.0
+
+[node name="BenchGoal" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_goal")
+
+[node name="Zone" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 1.0)
+shape = SubResource("BoxShape3D_zone")
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, -0.05)
+shape = SubResource("BoxShape3D_block")
+
+[node name="Seat" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("BoxMesh_seat")
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="Back" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.68, -0.19)
+mesh = SubResource("BoxMesh_back")
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="Leg1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 0.225, 0.15)
+mesh = SubResource("BoxMesh_leg")
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="Leg2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 0.225, 0.15)
+mesh = SubResource("BoxMesh_leg")
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="Leg3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 0.225, -0.15)
+mesh = SubResource("BoxMesh_leg")
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="Leg4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 0.225, -0.15)
+mesh = SubResource("BoxMesh_leg")
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="Hint" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0.1)
+billboard = 1
+pixel_size = 0.0025
+modulate = Color(1, 1, 1, 1)
+outline_modulate = Color(0.1, 0.12, 0.08, 1)
+text = "ここで おすわり
+おさんぽ おしまい"
+font_size = 48
+outline_size = 14

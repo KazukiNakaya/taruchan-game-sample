@@ -1,14 +1,17 @@
 class_name Goal
 extends Area3D
-## ゴール(ベンチ/おうち)。たるちゃんが入るとおさんぽ終了。
+## ゴール(ベンチ)。ベンチの前でおすわりをするとおさんぽ終了。
 
 signal reached
 
-
-func _ready() -> void:
-	body_entered.connect(_on_body_entered)
+var _done: bool = false
 
 
-func _on_body_entered(body: Node3D) -> void:
-	if body is Taruchan:
-		reached.emit()
+func _physics_process(_delta: float) -> void:
+	if _done:
+		return
+	for body in get_overlapping_bodies():
+		if body is Taruchan and (body as Taruchan).is_seated():
+			_done = true
+			reached.emit()
+			return
