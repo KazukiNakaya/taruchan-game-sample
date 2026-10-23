@@ -13,6 +13,17 @@ extends Node3D
 @export var rock_count: int = 14
 @export var grass_count: int = 750
 @export var leaf_patch_count: int = 4
+## 本番の素材(省略すると、仮のローポリを自分で作る)。詳しくは docs/ASSETS.md。
+## どれも、モデルの中の最初のメッシュ1つを使う(複数のメッシュは1つにまとめておく)
+## 木1本ぶん。原点=根元、上が +Y、高さ約 tree_model_height m
+@export var tree_scene: PackedScene
+@export var tree_model_height: float = 4.0
+## 木の当たり判定(幹)の半径(m)。tree_scene を使うとき、実際の幹の太さに合わせる
+@export var tree_trunk_radius: float = 0.18
+## 岩1個ぶん。原点=底の中心、大きさ約1m
+@export var rock_scene: PackedScene
+## 草1房ぶん。原点=根元、高さ約0.25m
+@export var grass_scene: PackedScene
 ## 小川: 森を横切る位置(z)、幅、深さ(m)。岸は垂直で、歩いて渡れない(跳んで越える)。
 ## 落ちても浅い(深さ < ジャンプの高さ)ので、跳べば どちらの岸にも上がれる
 @export var stream_z: float = -20.0
@@ -153,6 +164,10 @@ func _build_leaf_patches() -> void:
 
 
 func _build_trees() -> void:
+	var custom_tree := _scene_mesh(tree_scene) if tree_scene else null
+	if custom_tree:
+		_build_scene_trees(custom_tree)
+		return
 	var trunk_mesh := CylinderMesh.new()
 	trunk_mesh.top_radius = 0.8
 	trunk_mesh.bottom_radius = 1.0
@@ -204,13 +219,39 @@ func _build_trees() -> void:
 		body.add_child(col)
 
 
+## 本番の木のモデルで、森を作る
+func _build_scene_trees(mesh: Mesh) -> void:
+	var trees := _multimesh(mesh, tree_count, null, false)
+	var body := StaticBody3D.new()
+	body.name = "TreeColliders"
+	add_child(body)
+	for i in tree_count:
+		var z := _rng.randf_range(-length - 12.0, 10.0)
+		while not is_away_from_stream(z, 0.6):
+			z = _rng.randf_range(-length - 12.0, 10.0)
+		var side := -1.0 if _rng.randf() < 0.5 else 1.0
+		var x := path_x(z) + side * _rng.randf_range(TREE_MIN_DIST, TREE_MAX_DIST)
+		var scale := _rng.randf_range(0.8, 1.25)
+		_tree_positions.append(Vector2(x, z))
+		var basis := Basis.from_scale(Vector3.ONE * scale).rotated(Vector3.UP, _rng.randf() * TAU)
+		trees.multimesh.set_instance_transform(i, Transform3D(basis, Vector3(x, 0.0, z)))
+		var shape := CylinderShape3D.new()
+		shape.radius = tree_trunk_radius * scale
+		shape.height = tree_model_height * scale * 0.5
+		var col := CollisionShape3D.new()
+		col.shape = shape
+		col.position = Vector3(x, shape.height * 0.5, z)
+		body.add_child(col)
+
+
 func _build_rocks() -> void:
+	var rock_mesh := _scene_mesh(rock_scene) if rock_scene else null
 	var mesh := SphereMesh.new()
 	mesh.radius = 0.5
 	mesh.height = 1.0
 	mesh.radial_segments = 8
 	mesh.rings = 4
-	var rocks := _multimesh(mesh, rock_count, _flat_material(Color.WHITE, true))
+	var rocks := _multimesh(rock_mesh if rock_mesh else mesh, rock_count, _flat_material(Color.WHITE, true) if rock_mesh == null else null, rock_mesh == null)
 	var body := StaticBody3D.new()
 	body.name = "RockColliders"
 	add_child(body)
@@ -223,8 +264,9 @@ func _build_rocks() -> void:
 		var s := _rng.randf_range(0.25, 0.7)
 		var xf := Transform3D(Basis.from_scale(Vector3(s, s * 0.6, s * 0.85)).rotated(Vector3.UP, _rng.randf() * TAU), Vector3(x, s * 0.2, z))
 		rocks.multimesh.set_instance_transform(i, xf)
-		var g := _rng.randf_range(0.42, 0.58)
-		rocks.multimesh.set_instance_color(i, Color(g, g, g * 1.04))
+		if rock_mesh == null:
+			var g := _rng.randf_range(0.42, 0.58)
+			rocks.multimesh.set_instance_color(i, Color(g, g, g * 1.04))
 		var shape := SphereShape3D.new()
 		shape.radius = s * 0.5
 		var col := CollisionShape3D.new()
@@ -234,12 +276,15 @@ func _build_rocks() -> void:
 
 
 func _build_grass() -> void:
-	var tuft := _make_grass_tuft()
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.roughness = 1.0
-	var grass := _multimesh(tuft, grass_count, mat)
+	var custom := _scene_mesh(grass_scene) if grass_scene else null
+	var tuft: Mesh = custom if custom else _make_grass_tuft()
+	var mat: StandardMaterial3D = null
+	if custom == null:
+		mat = StandardMaterial3D.new()
+		mat.vertex_color_use_as_albedo = true
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		mat.roughness = 1.0
+	var grass := _multimesh(tuft, grass_count, mat, custom == null)
 	for i in grass_count:
 		var z := _rng.randf_range(-length - 6.0, 6.0)
 		var side := -1.0 if _rng.randf() < 0.5 else 1.0
@@ -250,7 +295,8 @@ func _build_grass() -> void:
 			s = 0.0  # 小川の中には草を生やさない
 		var xf := Transform3D(Basis.from_scale(Vector3(s, s, s)).rotated(Vector3.UP, _rng.randf() * TAU), Vector3(x, 0.0, z))
 		grass.multimesh.set_instance_transform(i, xf)
-		grass.multimesh.set_instance_color(i, Color(0.85, 0.95, 0.85).lerp(Color.WHITE, _rng.randf()))
+		if custom == null:
+			grass.multimesh.set_instance_color(i, Color(0.85, 0.95, 0.85).lerp(Color.WHITE, _rng.randf()))
 
 
 func _make_grass_tuft() -> ArrayMesh:
@@ -368,15 +414,29 @@ func _build_walls() -> void:
 		body.add_child(col)
 
 
-func _multimesh(mesh: Mesh, count: int, material: Material) -> MultiMeshInstance3D:
+## 素材(PackedScene)の中の、最初のメッシュ1つを取り出す。無ければ null
+func _scene_mesh(scene: PackedScene) -> Mesh:
+	var scene_root := scene.instantiate()
+	var found := scene_root.find_children("*", "MeshInstance3D", true, false)
+	if scene_root is MeshInstance3D:
+		found.push_front(scene_root)
+	var mesh: Mesh = (found[0] as MeshInstance3D).mesh if not found.is_empty() else null
+	scene_root.free()
+	if mesh == null:
+		push_warning("素材にメッシュがありません: " + scene.resource_path)
+	return mesh
+
+
+func _multimesh(mesh: Mesh, count: int, material: Material, use_colors: bool = true) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
+	mm.use_colors = use_colors
 	mm.mesh = mesh
 	mm.instance_count = count
 	var instance := MultiMeshInstance3D.new()
 	instance.multimesh = mm
-	instance.material_override = material
+	if material:
+		instance.material_override = material
 	add_child(instance)
 	return instance
 
