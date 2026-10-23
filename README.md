@@ -2,7 +2,7 @@
 
 犬の「たるちゃん」を操作して、森の小道をのんびりおさんぽする3Dゲームです。
 落ちている「いいもの」をクンクン嗅ぎあてて集め、1回のおさんぽが「おさんぽ日記」の1ページになります。
-バトルも、ゲームオーバーもありません。
+![](images/image.png)
 
 ## 遊ぶには
 
@@ -46,5 +46,3 @@
 - ちょうちょのモデル: [Butterflies](https://www.fab.com/listings/d3d80956-31a2-4395-959f-c592002c83c7) by Riada
   ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))。
   2匹のうち青い方を使い、ゲームに合わせて大きさを変えています。
-- (現在は使っていません)ちょうちょのモデル: [Monarch Butterfly - Minecraft](https://www.fab.com/listings/d70ac764-f650-40e3-ae88-0fcb05237fdd) by cubical
-  ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))。

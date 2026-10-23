@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dhgfnuoknvhgi"
-path="res://.godot/imported/monarch_butterfly_minecraft_0.png-b90b87ae0b50e06b1a9d93a95e95f33c.ctex"
+uid="uid://bxh75txhdwk25"
+path="res://.godot/imported/image.png-335de5a42352ab2bedfba8f109233489.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "b7c7bd04da9cddd7c58f41a0128a1938"
 }
 
 [deps]
 
-source_file="res://models/butterfly/Monarch Butterfly - Minecraft/monarch_butterfly_minecraft_0.png"
-dest_files=["res://.godot/imported/monarch_butterfly_minecraft_0.png-b90b87ae0b50e06b1a9d93a95e95f33c.ctex"]
+source_file="res://images/image.png"
+dest_files=["res://.godot/imported/image.png-335de5a42352ab2bedfba8f109233489.ctex"]
 
 [params]
 
@@ -26,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
