@@ -28,6 +28,7 @@ func is_open() -> bool:
 func open() -> void:
 	_refresh()
 	visible = true
+	AudioManager.play_ui(&"menu_open")
 	if pause_game:
 		get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -36,6 +37,7 @@ func open() -> void:
 
 func close() -> void:
 	visible = false
+	AudioManager.play_ui(&"menu_close")
 	if pause_game:
 		get_tree().paused = false
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

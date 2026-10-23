@@ -11,6 +11,7 @@ var _menu: Menu
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
+	AudioManager.start_bgm()
 	_build_ui()
 	_menu = MENU_SCENE.instantiate() as Menu
 	_menu.pause_game = false

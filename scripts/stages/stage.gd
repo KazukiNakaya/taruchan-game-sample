@@ -14,6 +14,8 @@ var _menu: Menu
 
 func _ready() -> void:
 	GameState.start_walk()
+	AudioManager.start_bgm()
+	AudioManager.start_ambient()
 	var sensor := player.get_node("SniffSensor") as SniffSensor
 	sensor.treasure_found.connect(GameState.add_found)
 	hud.bind(sensor)
@@ -22,7 +24,13 @@ func _ready() -> void:
 	goal.reached.connect(_on_goal_reached, CONNECT_ONE_SHOT)
 
 
+func _exit_tree() -> void:
+	AudioManager.stop_ambient()
+
+
 func _on_goal_reached() -> void:
+	AudioManager.stop_ambient()
+	AudioManager.play_sfx(&"goal")
 	_menu.enabled = false
 	GameState.finish_walk()
 	var result := result_scene.instantiate() as Result

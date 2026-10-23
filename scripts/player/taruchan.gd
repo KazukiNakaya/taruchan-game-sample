@@ -35,9 +35,12 @@ const GRAVITY: float = 9.8
 
 var _tail: TailWag
 var _tail_burst: float = 0.0
+var _sniff_timer: float = 0.0
+var _was_airborne: bool = false
 
 
 func _ready() -> void:
+	add_to_group(&"player")
 	_animator.setup($Model/AnimationPlayer)
 	_head_look.setup(self, $Model, _sniff)
 	_sniff.treasure_found.connect(_on_treasure_found)
@@ -79,6 +82,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("jump") and not busy:
 			velocity.y = sqrt(2.0 * GRAVITY * jump_height)
 			_animator.start_jump()
+			AudioManager.play_sfx(&"jump")
 	else:
 		velocity.y -= GRAVITY * delta
 
@@ -89,10 +93,15 @@ func _physics_process(delta: float) -> void:
 		# 左側の注目先は首だけでは届かないので、体ごと少し向ける
 		rotation.y += _head_look.body_turn_hint * minf(look_turn_speed * delta, 1.0)
 
+	var fall_speed := velocity.y
 	move_and_slide()
+	if is_on_floor() and _was_airborne and fall_speed < -1.0:
+		AudioManager.play_sfx(&"land")
+	_was_airborne = not is_on_floor()
 	GameState.add_distance(horizontal.length() * delta)
 	_animator.update(delta, is_on_floor(), horizontal.length(), Input.is_action_pressed("run"), _sniff.is_sniffing)
 	_update_tail(delta, horizontal.length())
+	_update_sniff_sound(delta)
 
 
 ## 入力ベクトルをカメラの向き(水平成分のみ)基準のワールド方向に変換する
@@ -113,6 +122,8 @@ func _update_sit() -> void:
 
 func _on_treasure_found(_data: TreasureData) -> void:
 	_animator.start_dig(dig_time)
+	AudioManager.play_sfx(&"dig")
+	AudioManager.play_sfx(&"discover")
 	_tail_burst = 1.5
 
 
@@ -126,8 +137,7 @@ func _update_tail(delta: float, speed: float) -> void:
 		frequency = 2.5 if speed < run_speed * 0.8 else 4.5
 	var nearest := _sniff.nearest
 	if nearest:
-		var d := nearest.global_position.distance_to(global_position)
-		var closeness := clampf(1.0 - d / (nearest.data.smell_radius * _sniff.smell_scale), 0.0, 1.0)
+		var closeness := _smell_closeness()
 		amplitude = lerpf(amplitude, 0.5, closeness)
 		frequency = lerpf(frequency, 7.0, closeness)
 	if _sniff.is_sniffing:
@@ -137,3 +147,24 @@ func _update_tail(delta: float, speed: float) -> void:
 		amplitude = 0.6
 		frequency = 8.0
 	_tail.set_mood(amplitude, frequency)
+
+
+## においの近さ(0=届く範囲の端、1=すぐそば)。においが届いていなければ 0
+func _smell_closeness() -> float:
+	var nearest := _sniff.nearest
+	if nearest == null:
+		return 0.0
+	var d := nearest.global_position.distance_to(global_position)
+	return clampf(1.0 - d / (nearest.data.smell_radius * _sniff.smell_scale), 0.0, 1.0)
+
+
+## クンクン音: においが近いほど間隔が短く、クンクン中は小刻みに鳴る
+func _update_sniff_sound(delta: float) -> void:
+	if _sniff.nearest == null:
+		_sniff_timer = 0.0
+		return
+	_sniff_timer -= delta
+	if _sniff_timer > 0.0:
+		return
+	AudioManager.play_sfx(&"sniff")
+	_sniff_timer = 0.45 if _sniff.is_sniffing else lerpf(2.4, 0.8, _smell_closeness())
