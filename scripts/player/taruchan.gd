@@ -102,11 +102,13 @@ func _physics_process(delta: float) -> void:
 		rotation.y += _head_look.body_turn_hint * minf(look_turn_speed * delta, 1.0)
 
 	var fall_speed := velocity.y
+	var before := global_position
 	move_and_slide()
 	if is_on_floor() and _was_airborne and fall_speed < -1.0:
 		AudioManager.play_sfx(&"land")
 	_was_airborne = not is_on_floor()
-	GameState.add_distance(horizontal.length() * delta)
+	# 木や壁に押しつけている間は進まないので、入力ではなく実際に動いた距離を数える
+	GameState.add_distance(Vector2(global_position.x - before.x, global_position.z - before.z).length())
 	_animator.update(delta, is_on_floor(), horizontal.length(), Input.is_action_pressed("run"), _sniff.is_sniffing)
 	_update_tail(delta, horizontal.length())
 	_update_sniff_sound(delta)

@@ -39,7 +39,10 @@ func _physics_process(delta: float) -> void:
 	var in_range := nearest != null and _distance_to(nearest) <= sniff_range
 	if in_range and nearest.global_position.y - global_position.y > max_height_gap:
 		in_range = false  # 高いところ(切り株・岩の上)は、乗らないと届かない
-	is_sniffing = enabled and in_range and Input.is_action_pressed("sniff")
+	# 空中では、高さの差が小さい瞬間があっても、クンクンできない(跳びながらのクンクン対策)
+	var body := get_parent() as CharacterBody3D
+	var grounded := body == null or body.is_on_floor()
+	is_sniffing = enabled and in_range and grounded and Input.is_action_pressed("sniff")
 
 	var previous := progress
 	if is_sniffing:

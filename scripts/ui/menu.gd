@@ -44,13 +44,15 @@ func close() -> void:
 	closed.emit()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not enabled or not event.is_action_pressed("menu"):
+## Tab はフォーカス移動に先に取られるので _input で受ける。開いている間は enabled に関わらず閉じられる
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed("menu") or event.is_echo():
 		return
-	get_viewport().set_input_as_handled()
 	if visible:
+		get_viewport().set_input_as_handled()
 		close()
-	else:
+	elif enabled:
+		get_viewport().set_input_as_handled()
 		open()
 
 
@@ -93,6 +95,7 @@ func _build_ui() -> void:
 
 
 func _on_title_pressed() -> void:
+	GameState.running = false
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 

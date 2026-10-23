@@ -6,6 +6,7 @@ const WALK_SCENE := "res://scenes/stages/forest_path.tscn"
 const MENU_SCENE := preload("res://scenes/ui/menu.tscn")
 
 var _menu: Menu
+var _buttons: Array[Button] = []
 
 
 func _ready() -> void:
@@ -16,6 +17,7 @@ func _ready() -> void:
 	_menu = MENU_SCENE.instantiate() as Menu
 	_menu.pause_game = false
 	_menu.enabled = false
+	_menu.closed.connect(_on_menu_closed)
 	add_child(_menu)
 
 
@@ -52,6 +54,7 @@ func _button(text: String, handler: Callable) -> Button:
 	button.custom_minimum_size = Vector2(280, 48)
 	button.add_theme_font_size_override("font_size", 22)
 	button.pressed.connect(handler)
+	_buttons.append(button)
 	return button
 
 
@@ -60,4 +63,13 @@ func _on_start_pressed() -> void:
 
 
 func _on_book_pressed() -> void:
+	# メニューを開いている間は、後ろのボタンにフォーカスが移らないようにする
+	for button in _buttons:
+		button.focus_mode = Control.FOCUS_NONE
 	_menu.open()
+
+
+func _on_menu_closed() -> void:
+	for button in _buttons:
+		button.focus_mode = Control.FOCUS_ALL
+	_buttons[0].grab_focus()
