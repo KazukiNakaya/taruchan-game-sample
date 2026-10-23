@@ -82,10 +82,13 @@ func _pick_data() -> TreasureData:
 func _pick_hidden_spot() -> Vector3:
 	var builder := get_tree().get_first_node_in_group(&"surface_map") as ForestBuilder
 	var spot := Vector3.ZERO
-	for attempt in 40:
-		var z := randf_range(hidden_z_range.x, hidden_z_range.y)
-		var side := -1.0 if randf() < 0.5 else 1.0
-		spot = Vector3(ForestBuilder.path_x(z) + side * randf_range(hidden_offset.x, hidden_offset.y), 0.0, z)
-		if builder == null or builder.is_clear(spot, min_tree_distance):
-			break
+	# 最初は木から min_tree_distance 離れた場所を探し、見つからなければ余裕を小さくして探し直す
+	for margin in [min_tree_distance, 0.3]:
+		for attempt in 100:
+			var z := randf_range(hidden_z_range.x, hidden_z_range.y)
+			var side := -1.0 if randf() < 0.5 else 1.0
+			spot = Vector3(ForestBuilder.path_x(z) + side * randf_range(hidden_offset.x, hidden_offset.y), 0.0, z)
+			if builder == null or builder.is_clear(spot, margin):
+				return spot
+	push_warning("ButterflyEvent: 隠しいいものの置き場所が見つかりませんでした")
 	return spot

@@ -147,7 +147,9 @@ func _free_player() -> AudioStreamPlayer:
 
 func _on_node_added(node: Node) -> void:
 	if node is BaseButton:
-		(node as BaseButton).pressed.connect(play_ui.bind(&"ui_click"))
+		var click := play_ui.bind(&"ui_click")
+		if not (node as BaseButton).pressed.is_connected(click):
+			(node as BaseButton).pressed.connect(click)
 
 
 func _on_bird_timer() -> void:
