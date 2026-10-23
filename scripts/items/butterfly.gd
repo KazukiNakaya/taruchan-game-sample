@@ -12,8 +12,17 @@ enum State { WAIT, GUIDE, HOVER, LEAVE }
 ## 案内中、たるちゃんがこの距離(m)より遠いと、止まって待つ
 @export var wait_radius: float = 2.5
 @export var flap_hz: float = 11.0
-## 見やすいように、実寸(小さな犬に対して)より大きくしている倍率
+## 見やすいように、実寸(小さな犬に対して)より大きくしている倍率(仮の見た目用)
 @export var size_scale: float = 2.4
+## 本番の蝶々のモデル(glb)。設定されていれば、仮の板2枚の代わりに使う。
+## 羽は左右に分けて、胴体のつけ根を軸に羽ばたかせる(モデルの前が -Z、羽が ±X に広がる向き)
+@export var model_scene: PackedScene
+## モデルの羽を広げた幅(m)
+@export var model_wing_span: float = 0.36
+## モデル座標(元の単位)での、羽のつけ根(胴体の中心線)。モデルを差し替えたら合わせる
+@export var model_hinge: Vector3 = Vector3(144.0, 24.0, 98.0)
+## 胴体とみなす x の範囲(モデル座標)。この範囲に収まるメッシュは胴体、それより左右は羽
+@export var model_body_x_range: Vector2 = Vector2(120.0, 170.0)
 @export var wing_color: Color = Color(0.98, 0.62, 0.15)
 
 var target: Treasure
@@ -127,6 +136,8 @@ func _start_leaving() -> void:
 
 
 func _build_visual() -> void:
+	if model_scene and _build_model_visual():
+		return
 	var material := StandardMaterial3D.new()
 	material.albedo_color = wing_color
 	material.emission_enabled = true
@@ -161,3 +172,61 @@ func _make_wing(material: Material, side: float) -> Node3D:
 	quad.position = Vector3(side * 0.036 * size_scale, 0.0, 0.0)
 	pivot.add_child(quad)
 	return pivot
+
+
+## モデル(glb)の見た目を作る。羽を左右のグループに分けて、つけ根の軸で動かせるようにする。
+## 失敗したら false を返し、仮の見た目に戻る。
+func _build_model_visual() -> bool:
+	var model := model_scene.instantiate() as Node3D
+	if model == null:
+		return false
+	var meshes := model.find_children("*", "MeshInstance3D", true, false)
+	if meshes.is_empty():
+		model.queue_free()
+		return false
+
+	var root := Node3D.new()
+	var model_size := _model_width(model)
+	var k := model_wing_span / model_size
+	root.scale = Vector3.ONE * k
+	root.position = -model_hinge * k
+	add_child(root)
+	root.add_child(model)
+
+	# 羽ばたきの軸(つけ根)。root の座標では model_hinge の位置
+	var plus_pivot := Node3D.new()  # +X 側の羽
+	var minus_pivot := Node3D.new()  # -X 側の羽
+	plus_pivot.position = model_hinge
+	minus_pivot.position = model_hinge
+	root.add_child(plus_pivot)
+	root.add_child(minus_pivot)
+
+	for node in meshes:
+		var mesh_instance := node as MeshInstance3D
+		mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var box := mesh_instance.global_transform * mesh_instance.get_aabb()
+		# global_transform は model が root の子になった今の座標。model 座標に戻すため root の逆変換をかける
+		var local_box := root.global_transform.affine_inverse() * box
+		var in_body := local_box.position.x >= model_body_x_range.x and local_box.end.x <= model_body_x_range.y
+		if in_body:
+			continue
+		mesh_instance.reparent(plus_pivot if local_box.get_center().x > model_hinge.x else minus_pivot, true)
+	_left_wing = plus_pivot
+	_right_wing = minus_pivot
+	return true
+
+
+## モデル全体の、羽を広げた方向(x)の幅(元の単位)
+func _model_width(model: Node3D) -> float:
+	var first := true
+	var total := AABB()
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		var box := mesh_instance.transform * mesh_instance.get_aabb()
+		var parent := mesh_instance.get_parent()
+		while parent and parent != model:
+			box = (parent as Node3D).transform * box
+			parent = parent.get_parent()
+		total = box if first else total.merge(box)
+		first = false
+	return maxf(total.size.x, 0.001)
