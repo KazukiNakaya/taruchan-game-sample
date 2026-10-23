@@ -25,14 +25,20 @@ func _ready() -> void:
 	_toast.modulate.a = 0.0
 	add_child(_toast)
 
+	# 左上: 全体マップと、その下に見つけた個数
+	var top_left := VBoxContainer.new()
+	top_left.position = Vector2(16, 16)
+	top_left.add_theme_constant_override("separation", 6)
+	add_child(top_left)
+	top_left.add_child(ForestMap.new())
 	_counter = Label.new()
-	_counter.position = Vector2(24, 20)
 	_counter.add_theme_font_size_override("font_size", 22)
 	_outline(_counter)
-	add_child(_counter)
+	top_left.add_child(_counter)
 	add_child(ControlsGuide.new())
 	_update_counter()
 	GameState.treasure_added.connect(func(_d: TreasureData) -> void: _update_counter())
+	GameState.total_changed.connect(func(_t: int) -> void: _update_counter())
 
 
 ## 明るい空や地面の上でも読めるように、縁取りと影をつける
@@ -67,4 +73,4 @@ func _on_treasure_found(data: TreasureData) -> void:
 
 
 func _update_counter() -> void:
-	_counter.text = "みつけた: %d" % GameState.found.size()
+	_counter.text = "みつけた: %d / %d" % [GameState.found.size(), GameState.total_treasures]

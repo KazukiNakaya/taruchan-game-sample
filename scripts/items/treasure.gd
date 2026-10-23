@@ -7,12 +7,15 @@ signal discovered(data: TreasureData)
 @export var data: TreasureData
 
 var is_found: bool = false
+## 蝶々が案内する隠しいいもの(おすわりのマップ表示には出さない)
+var hidden_by_butterfly: bool = false
 
 var _visual: Node3D
 
 
 func _ready() -> void:
 	add_to_group(&"treasure")
+	GameState.register_treasure()
 	_build_visual()
 	_visual.visible = false
 

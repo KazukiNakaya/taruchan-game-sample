@@ -38,6 +38,16 @@ func _ready() -> void:
 	_build_walls()
 
 
+## 木の位置(x, z)の一覧(マップ表示用)
+func tree_positions() -> PackedVector2Array:
+	return _tree_positions
+
+
+## 葉っぱだまり(x, z, 半径)の一覧(マップ表示用)
+func leaf_patches() -> Array[Vector3]:
+	return _leaf_patches
+
+
 ## 一番近い木の幹までの距離(m)。置き物が木に重ならないかの判定に使う
 func min_tree_distance(pos: Vector3) -> float:
 	var best := INF

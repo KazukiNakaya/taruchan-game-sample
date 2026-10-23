@@ -24,6 +24,7 @@ func _spawn() -> void:
 		return
 	var treasure := treasure_scene.instantiate() as Treasure
 	treasure.data = data
+	treasure.hidden_by_butterfly = true
 	treasure.position = _pick_hidden_spot()
 	get_parent().add_child(treasure)
 
