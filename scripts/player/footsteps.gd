@@ -22,6 +22,7 @@ func _ready() -> void:
 	_player = AudioStreamPlayer3D.new()
 	_player.name = "FootstepPlayer"
 	_player.volume_db = volume_db
+	_player.bus = &"SFX"
 	_player.unit_size = 3.0
 	_body.add_child.call_deferred(_player)
 	for surface in SURFACES:

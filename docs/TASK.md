@@ -29,7 +29,7 @@
   - 確認: においに近づくとしっぽが速くなる、クンクンで頭が下がる
 - [x] **Step 8 おすわり** (`step8/sit`): `sit`(Ctrl / C / パッドY)でおすわり(`sit_start`→`sit_idle`→`sit_end`)。座っている間は動けず、ジャンプ・クンクンもできない。もう一度押すと立つ。座っている間は においの届く半径が1.5倍(`Taruchan.sit_smell_scale`)。ゴールはベンチ(`scenes/stages/bench_goal.tscn`)で、ベンチの前でおすわりするとおさんぽ終了
   - 確認: Ctrl/Cで座る・もう一度で立つ。座ると遠いにおいに首が向く。ベンチの前で座るとリザルトが出る
-- [ ] **Step 9 効果音とBGM** (`step9/audio`): 生成した仮素材(`audio/`)で、鳥の声(ランダム間隔)、クンクン音(においが近いほど間隔が短い)、発見ジングル、控えめなBGM、メニュー/UIの音。`AudioManager`(autoload)で音量を一元管理
+- [x] **Step 9 効果音とBGM** (`step9/audio`): 生成した仮素材(`audio/`)で、鳥の声(ランダム間隔)、クンクン音(においが近いほど間隔が短い)、発見ジングル、控えめなBGM、メニュー/UIの音。`AudioManager`(autoload)で音量を一元管理
   - 確認: 森で鳥の声が時々鳴る、クンクンで音が出る、発見で音が鳴る
 - [ ] **Step 10 蝶々の寄り道** (`step10/butterfly`): 蝶々が飛んでくる。追いかけると隠しアイテムの場所へ案内される。蝶々は首の注目先の優先度2(においの次)。羽ばたきは仮の動き
   - 確認: 蝶々を追うとアイテムの場所に着き、クンクンで発見できる
@@ -46,6 +46,7 @@
 - 首の可動域(右45°/左20°、上35°/下45°)と追従速度は `HeadLook` のエクスポート変数。`LookAtModifier3D` は head の forward=+Y、回転軸=Z。胸(chest)にも影響度0.3で適用。左の可動域を超える注目先は、立ち止まっているとき体ごと向く
 - いいもの5種(どんぐり/木の枝/テニスボール/骨のおやつ/四つ葉)は仮の形(色違いプリミティブ)。`data/treasures/*.tres` の `scene` に Meshy 製を設定すれば差し替えられる。全種類の一覧は `data/treasure_catalog.tres`(配置の抽選と図鑑で共用)
 - 森は仮のローポリ(`ForestBuilder` が起動時に生成)。メインシーンは `scenes/main.tscn`(タイトル)から `scenes/stages/forest_path.tscn`(小道約40m)。`test_plane.tscn` は動作確認用に残す
+- 効果音・BGM・環境音は `tools/generate_audio.py` で生成した仮素材(`audio/sfx/` `audio/ambient/` `audio/bgm/`)。`AudioManager`(autoload)が名前で読み込み、バス(Music/SFX/Ambient/UI)の音量を `BUS_VOLUME_DB` で一元管理する。本番素材は同じファイル名で差し替える。どのボタンにもクリック音が付く
 - 足音はノイズから生成したWAV(`audio/footsteps/`、土/草/葉っぱ×3種)の仮素材。足元の地面は `ForestBuilder.surface_at()` で判定
 - メニューは Tab / Esc(パッドは Start)で開閉し、開いている間はゲームを止める。おさんぽ中のメニューに「タイトルにもどる」「おわる」あり(途中のおさんぽは保存されない)
 - セーブは `user://save.tres`(図鑑の解放状況と日記)。ゴール到達でおさんぽ1回ぶんを日記に追加して保存する。Windowsでは `%APPDATA%\Godot\app_userdata\taruchan-game-sample\`
