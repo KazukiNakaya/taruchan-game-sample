@@ -6,6 +6,11 @@
 
 ## 遊ぶには
 
+1. [Releases](https://github.com/KazukiNakaya/taruchan-game-sample/releases) から、最新の `taruchan-sanpo-v*-windows.exe` をダウンロードします。
+2. ダウンロードしたexeを起動すると、ゲームが始まります(インストール不要)。
+
+### ソースから動かす場合
+
 1. [Godot Engine 4.7](https://godotengine.org/) をダウンロードします。
 2. Godot を起動して「インポート」から、このフォルダの `project.godot` を開きます。
 3. 右上の「プロジェクトを実行」(F5)で、ゲームが始まります。

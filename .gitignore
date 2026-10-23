@@ -9,3 +9,6 @@ blender_movie/*.txt
 # 作業用バックアップ
 _backup/
 models/_source/
+
+# エクスポート成果物
+build/
