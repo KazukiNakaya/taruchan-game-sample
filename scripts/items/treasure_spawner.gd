@@ -17,12 +17,13 @@ func spawn() -> void:
 	for i in mini(count, points.size()):
 		var point := points[i] as Node3D
 		var treasure := treasure_scene.instantiate() as Treasure
-		treasure.data = _pick()
+		treasure.data = pick_weighted()
 		treasure.position = point.position
 		get_parent().add_child.call_deferred(treasure)
 
 
-func _pick() -> TreasureData:
+## カタログから、出やすさ(spawn_weight)の重み付きで1つ選ぶ
+static func pick_weighted() -> TreasureData:
 	var treasures := GameState.CATALOG.treasures
 	var total := 0.0
 	for data in treasures:

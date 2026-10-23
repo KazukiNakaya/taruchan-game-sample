@@ -12,6 +12,9 @@ var enabled: bool = true
 ## においの届く半径にかける倍率(おすわりで広がる)
 var smell_scale: float = 1.0
 
+## いいものが足元よりこれ以上(m)高いところにあると、クンクンが届かない(切り株・岩の上はジャンプで乗る)
+@export var max_height_gap: float = 0.15
+
 ## 発見までの長押し時間(秒)
 @export var sniff_time: float = 1.0
 ## 離したときにゲージが戻る速さ(1秒あたり)
@@ -34,6 +37,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	nearest = _find_nearest()
 	var in_range := nearest != null and _distance_to(nearest) <= sniff_range
+	if in_range and nearest.global_position.y - global_position.y > max_height_gap:
+		in_range = false  # 高いところ(切り株・岩の上)は、乗らないと届かない
 	is_sniffing = enabled and in_range and Input.is_action_pressed("sniff")
 
 	var previous := progress

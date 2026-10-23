@@ -19,6 +19,9 @@ const PATH_COLOR := Color(0.78, 0.62, 0.42, 0.9)
 const TREE_COLOR := Color(0.18, 0.42, 0.2, 0.75)
 const LEAF_COLOR := Color(0.75, 0.45, 0.2, 0.6)
 const GOAL_COLOR := Color(1.0, 0.85, 0.3)
+const WATER_COLOR := Color(0.45, 0.75, 0.95, 0.85)
+const LOG_COLOR := Color(0.55, 0.38, 0.22)
+const PERCH_COLOR := Color(0.6, 0.55, 0.5)
 const PLAYER_COLOR := Color(1.0, 1.0, 1.0)
 const HINT_COLOR := Color(1.0, 0.9, 0.45)
 
@@ -71,6 +74,15 @@ func _draw_forest() -> void:
 		points.append(_to_map(Vector3(ForestBuilder.path_x(z), 0.0, z)))
 		z -= 1.0
 	draw_polyline(points, PATH_COLOR, _builder.path_half_width * 2.0 * pixels_per_meter)
+	var stream_top := _to_map(Vector3(0.0, 0.0, _builder.stream_z - _builder.stream_half_width()))
+	var stream_bottom := _to_map(Vector3(0.0, 0.0, _builder.stream_z + _builder.stream_half_width()))
+	draw_rect(Rect2(0.0, stream_top.y, _map_size().x, maxf(stream_bottom.y - stream_top.y, 2.0)), WATER_COLOR)
+	var features := get_tree().get_first_node_in_group(&"jump_features") as JumpFeatures
+	if features:
+		for ends in features.logs():
+			draw_line(_to_map(Vector3(ends[0].x, 0.0, ends[0].y)), _to_map(Vector3(ends[1].x, 0.0, ends[1].y)), LOG_COLOR, 3.0)
+		for perch in features.perches():
+			draw_circle(_to_map(Vector3(perch.x, 0.0, perch.y)), maxf(perch.z * pixels_per_meter, 2.5), PERCH_COLOR)
 	for tree in _builder.tree_positions():
 		var p := _to_map(Vector3(tree.x, 0.0, tree.y))
 		if Rect2(Vector2.ZERO, _map_size()).has_point(p):

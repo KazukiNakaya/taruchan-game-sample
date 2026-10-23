@@ -86,6 +86,6 @@ func _pick_hidden_spot() -> Vector3:
 		var z := randf_range(hidden_z_range.x, hidden_z_range.y)
 		var side := -1.0 if randf() < 0.5 else 1.0
 		spot = Vector3(ForestBuilder.path_x(z) + side * randf_range(hidden_offset.x, hidden_offset.y), 0.0, z)
-		if builder == null or builder.min_tree_distance(spot) > min_tree_distance:
+		if builder == null or builder.is_clear(spot, min_tree_distance):
 			break
 	return spot
