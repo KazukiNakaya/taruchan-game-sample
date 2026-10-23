@@ -13,10 +13,10 @@ extends Node3D
 @export var rock_count: int = 14
 @export var grass_count: int = 750
 @export var leaf_patch_count: int = 4
-## 小川: 森を横切る位置(z)、底の幅、岸の斜面の幅、深さ(m)。上の幅 = 底 + 斜面×2
+## 小川: 森を横切る位置(z)、幅、深さ(m)。岸は垂直で、歩いて渡れない(跳んで越える)。
+## 落ちても浅い(深さ < ジャンプの高さ)ので、跳べば どちらの岸にも上がれる
 @export var stream_z: float = -20.0
-@export var stream_bottom_width: float = 0.3
-@export var stream_bank_width: float = 0.25
+@export var stream_width: float = 0.6
 @export var stream_depth: float = 0.15
 
 const WALL_X: float = 19.0
@@ -69,18 +69,12 @@ func min_tree_distance(pos: Vector3) -> float:
 
 ## 地面の高さ(m)。小川の溝だけ低い
 func ground_height(z: float) -> float:
-	var d := absf(z - stream_z)
-	var half_bottom := stream_bottom_width * 0.5
-	if d <= half_bottom:
-		return -stream_depth
-	if d <= half_bottom + stream_bank_width:
-		return -stream_depth * (1.0 - (d - half_bottom) / stream_bank_width)
-	return 0.0
+	return -stream_depth if absf(z - stream_z) < stream_half_width() else 0.0
 
 
-## 小川の上の幅の半分(m)
+## 小川の幅の半分(m)
 func stream_half_width() -> float:
-	return stream_bottom_width * 0.5 + stream_bank_width
+	return stream_width * 0.5
 
 
 ## 小川にかからないか(margin: 余裕 m)
@@ -105,7 +99,7 @@ func is_clear(pos: Vector3, margin: float) -> bool:
 
 ## 足元の地面の種類(足音の切り替え用): water / dirt / grass / leaves
 func surface_at(pos: Vector3) -> StringName:
-	if absf(pos.z - stream_z) <= stream_bottom_width * 0.5 + stream_bank_width * 0.5:
+	if absf(pos.z - stream_z) < stream_half_width():
 		return &"water"
 	for patch in _leaf_patches:
 		if Vector2(pos.x - patch.x, pos.z - patch.y).length() <= patch.z:
@@ -118,12 +112,12 @@ func surface_at(pos: Vector3) -> StringName:
 func _build_path() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var zs := _z_samples(6.0, -length - 6.0, 1.0)
-	for i in zs.size() - 1:
-		var z := zs[i]
-		var z2 := zs[i + 1]
-		var y := ground_height(z) + 0.01
-		var y2 := ground_height(z2) + 0.01
+	var profile := _profile(6.0, -length - 6.0, 1.0)
+	for i in profile.size() - 1:
+		var z := profile[i].x
+		var z2 := profile[i + 1].x
+		var y := profile[i].y + 0.01
+		var y2 := profile[i + 1].y + 0.01
 		var a := Vector3(path_x(z) - path_half_width, y, z)
 		var b := Vector3(path_x(z) + path_half_width, y, z)
 		var c := Vector3(path_x(z2) - path_half_width, y2, z2)
@@ -285,14 +279,12 @@ func _make_grass_tuft() -> ArrayMesh:
 func _build_ground() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var zs := _z_samples(12.0, -length - 12.0, 2.0)
-	for i in zs.size() - 1:
-		var z := zs[i]
-		var z2 := zs[i + 1]
-		var a := Vector3(-GROUND_HALF_WIDTH, ground_height(z), z)
-		var b := Vector3(GROUND_HALF_WIDTH, ground_height(z), z)
-		var c := Vector3(-GROUND_HALF_WIDTH, ground_height(z2), z2)
-		var d := Vector3(GROUND_HALF_WIDTH, ground_height(z2), z2)
+	var profile := _profile(12.0, -length - 12.0, 2.0)
+	for i in profile.size() - 1:
+		var a := Vector3(-GROUND_HALF_WIDTH, profile[i].y, profile[i].x)
+		var b := Vector3(GROUND_HALF_WIDTH, profile[i].y, profile[i].x)
+		var c := Vector3(-GROUND_HALF_WIDTH, profile[i + 1].y, profile[i + 1].x)
+		var d := Vector3(GROUND_HALF_WIDTH, profile[i + 1].y, profile[i + 1].x)
 		for v in [a, c, b, b, c, d]:
 			st.add_vertex(v)
 	st.generate_normals()
@@ -306,7 +298,9 @@ func _build_ground() -> void:
 	body.name = "GroundCollider"
 	add_child(body)
 	var col := CollisionShape3D.new()
-	col.shape = mesh.create_trimesh_shape()
+	var shape := mesh.create_trimesh_shape()
+	shape.backface_collision = true  # 溝の垂直な岸も、どちらから当たっても止める
+	col.shape = shape
 	body.add_child(col)
 
 
@@ -315,7 +309,7 @@ func _build_water() -> void:
 	var water := MeshInstance3D.new()
 	water.name = "Water"
 	var mesh := PlaneMesh.new()
-	mesh.size = Vector2(GROUND_HALF_WIDTH * 2.0, stream_half_width() * 2.0 - stream_bank_width * 0.6)
+	mesh.size = Vector2(GROUND_HALF_WIDTH * 2.0, stream_width - 0.02)
 	water.mesh = mesh
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.5, 0.8, 0.95, 0.55)
@@ -327,22 +321,28 @@ func _build_water() -> void:
 	add_child(water)
 
 
-## z の分割点(奥ほど小さい)。小川の近くは細かく分ける
-func _z_samples(z_start: float, z_end: float, step: float) -> PackedFloat32Array:
-	var zs := PackedFloat32Array()
-	var fine_from := stream_z + stream_half_width() + 0.05
-	var fine_to := stream_z - stream_half_width() - 0.05
+## 地面の断面: (z, 高さ)の並び(奥ほど z が小さい)。小川の岸は同じ z に高さ違いの点を2つ置いて、垂直な壁にする
+func _profile(z_start: float, z_end: float, step: float) -> Array[Vector2]:
+	var half := stream_half_width()
+	var points: Array = []  # [z, 高さ, 同じ z のときの順番]
 	var z := z_start
 	while z > z_end:
-		zs.append(z)
-		if z > fine_from and z - step < fine_from:
-			z = fine_from
-		elif z <= fine_from and z > fine_to:
-			z -= 0.05
-		else:
-			z -= step
-	zs.append(z_end)
-	return zs
+		if absf(z - stream_z) > half + 0.001:
+			points.append([z, 0.0, 0])
+		z -= step
+	points.append([z_end, 0.0, 0])
+	points.append([stream_z + half, 0.0, 0])
+	points.append([stream_z + half, -stream_depth, 1])
+	points.append([stream_z - half, -stream_depth, 0])
+	points.append([stream_z - half, 0.0, 1])
+	points.sort_custom(func(a: Array, b: Array) -> bool:
+		if absf(a[0] - b[0]) > 0.0001:
+			return a[0] > b[0]
+		return a[2] < b[2])
+	var result: Array[Vector2] = []
+	for p in points:
+		result.append(Vector2(p[0], p[1]))
+	return result
 
 
 func _build_walls() -> void:
