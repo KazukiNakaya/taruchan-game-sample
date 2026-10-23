@@ -61,7 +61,12 @@ func _on_progress_changed(value: float) -> void:
 
 
 func _on_treasure_found(data: TreasureData) -> void:
-	_toast.text = "%s をみつけた!  %s" % [data.display_name, data.stars()]
+	show_message("%s をみつけた!  %s" % [data.display_name, data.stars()])
+
+
+## 画面上部の中央に、短いメッセージを出す(しばらくすると消える)
+func show_message(text: String) -> void:
+	_toast.text = text
 	_toast.reset_size()
 	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 60)
 	if _toast_tween:

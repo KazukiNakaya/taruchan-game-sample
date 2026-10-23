@@ -22,6 +22,9 @@ func _ready() -> void:
 	_menu = MENU_SCENE.instantiate() as Menu
 	add_child(_menu)
 	goal.reached.connect(_on_goal_reached, CONNECT_ONE_SHOT)
+	var butterfly_event := get_node_or_null("ButterflyEvent") as ButterflyEvent
+	if butterfly_event:
+		butterfly_event.appeared.connect(func() -> void: hud.show_message("ちょうちょが やってきた…?"))
 
 
 func _exit_tree() -> void:
