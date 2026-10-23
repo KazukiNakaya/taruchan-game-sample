@@ -6,6 +6,12 @@ extends Node3D
 ## 置いたものは ForestBuilder に「ふさがっている場所」として伝え、ほかの置き物と重ならないようにする。
 
 @export var treasure_scene: PackedScene
+## 本番の素材(省略すると仮のローポリ)。実寸で作り、原点=底の中心。詳しくは docs/ASSETS.md
+## 倒木: 長さ約3.2m(横向き=X軸方向)、半径約0.13m
+@export var log_scene: PackedScene
+## 切り株: 半径約0.3m、高さ0.28m / 平たい岩: 半径約0.38m、高さ0.28m
+@export var stump_scene: PackedScene
+@export var rock_perch_scene: PackedScene
 @export var random_seed: int = 11
 ## 倒木を置く位置(z)
 @export var log_z: PackedFloat32Array = PackedFloat32Array([-11.0, -29.0])
@@ -59,17 +65,23 @@ func _build_log(builder: ForestBuilder, z: float) -> void:
 	var across := Vector3(1.0, 0.0, -slope).normalized()
 	var basis := Basis(Vector3.UP, across, Vector3.UP.cross(across))
 
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = log_radius
-	mesh.bottom_radius = log_radius
-	mesh.height = log_length
-	mesh.radial_segments = 8
-	mesh.rings = 1
-	var visual := MeshInstance3D.new()
-	visual.mesh = mesh
-	visual.material_override = _material(WOOD)
-	visual.transform = Transform3D(basis, center)
-	add_child(visual)
+	if log_scene:
+		var model := log_scene.instantiate() as Node3D
+		# モデルは X 軸方向が長さ。倒木の向き(across)に合わせる
+		model.transform = Transform3D(Basis(across, Vector3.UP, across.cross(Vector3.UP)), Vector3(center.x, 0.0, center.z))
+		add_child(model)
+	else:
+		var mesh := CylinderMesh.new()
+		mesh.top_radius = log_radius
+		mesh.bottom_radius = log_radius
+		mesh.height = log_length
+		mesh.radial_segments = 8
+		mesh.rings = 1
+		var visual := MeshInstance3D.new()
+		visual.mesh = mesh
+		visual.material_override = _material(WOOD)
+		visual.transform = Transform3D(basis, center)
+		add_child(visual)
 
 	# 当たり判定は箱(上に乗れて、転がり落ちない)
 	var body := StaticBody3D.new()
@@ -111,6 +123,14 @@ func _build_perches(builder: ForestBuilder) -> void:
 
 
 func _build_perch(spot: Vector3, radius: float, is_stump: bool) -> void:
+	var scene := stump_scene if is_stump else rock_perch_scene
+	if scene:
+		var model := scene.instantiate() as Node3D
+		model.position = spot
+		model.rotation.y = _rng.randf() * TAU
+		add_child(model)
+		_add_perch_collider(spot, radius)
+		return
 	var mesh := CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius * (1.12 if is_stump else 1.2)
@@ -137,6 +157,10 @@ func _build_perch(spot: Vector3, radius: float, is_stump: bool) -> void:
 		top.position = spot + Vector3(0.0, perch_height + 0.003, 0.0)
 		add_child(top)
 
+	_add_perch_collider(spot, radius)
+
+
+func _add_perch_collider(spot: Vector3, radius: float) -> void:
 	var body := StaticBody3D.new()
 	add_child(body)
 	var shape := CylinderShape3D.new()
