@@ -3,7 +3,7 @@ extends Node
 ## たるちゃんのアニメ切り替え(待機/歩き/小走り/ジャンプ)。
 ## 本番アニメ(idle / run)がモデルに無い間は、歩きアニメで代用する。名前が届けば自動で使う。
 
-enum State { GROUND, JUMP_START, JUMP_AIR, JUMP_LAND }
+enum State { GROUND, JUMP_START, JUMP_AIR, JUMP_LAND, DIG }
 
 const IDLE: StringName = &"idle"
 const WALK: StringName = &"walk"
@@ -11,6 +11,8 @@ const RUN: StringName = &"run"
 const JUMP_START: StringName = &"jump_start"
 const JUMP_AIR: StringName = &"jump_air"
 const JUMP_LAND: StringName = &"jump_land"
+const SNIFF: StringName = &"sniff"
+const DIG: StringName = &"dig"
 
 ## 歩きアニメが足滑りしない速度(m/s)
 const WALK_ANIM_SPEED: float = 0.32
@@ -40,6 +42,18 @@ func is_jumping() -> bool:
 	return _state != State.GROUND
 
 
+## 掘る動作の最中(動けない)
+func is_digging() -> bool:
+	return _state == State.DIG
+
+
+## 掘る動作を duration 秒だけ再生する(dig が無ければ sniff、それも無ければ待機)
+func start_dig(duration: float) -> void:
+	_state = State.DIG
+	_timer = duration
+	_play(_first_existing([DIG, SNIFF, IDLE]), 1.0)
+
+
 func start_jump() -> void:
 	_state = State.JUMP_START
 	_grace = TAKEOFF_GRACE
@@ -47,7 +61,7 @@ func start_jump() -> void:
 	_play(JUMP_START, 1.0)
 
 
-func update(delta: float, on_floor: bool, speed: float, running: bool) -> void:
+func update(delta: float, on_floor: bool, speed: float, running: bool, sniffing: bool = false) -> void:
 	_grace = maxf(_grace - delta, 0.0)
 	match _state:
 		State.JUMP_START:
@@ -64,12 +78,16 @@ func update(delta: float, on_floor: bool, speed: float, running: bool) -> void:
 			_timer -= delta
 			if _timer <= 0.0:
 				_state = State.GROUND
+		State.DIG:
+			_timer -= delta
+			if _timer <= 0.0:
+				_state = State.GROUND
 		State.GROUND:
 			if not on_floor and _grace <= 0.0:
 				_state = State.JUMP_AIR
 				_play(JUMP_AIR, 1.0)
 	if _state == State.GROUND:
-		_update_ground(speed, running)
+		_update_ground(speed, running, sniffing)
 
 
 func _land() -> void:
@@ -81,8 +99,10 @@ func _land() -> void:
 		_state = State.GROUND
 
 
-func _update_ground(speed: float, running: bool) -> void:
-	if speed < MOVE_THRESHOLD:
+func _update_ground(speed: float, running: bool, sniffing: bool) -> void:
+	if sniffing and _player.has_animation(SNIFF):
+		_play(SNIFF, 1.0)
+	elif speed < MOVE_THRESHOLD:
 		if _player.has_animation(IDLE):
 			_play(IDLE, 1.0)
 		else:
@@ -107,6 +127,13 @@ func _play(anim: StringName, scale: float) -> void:
 		_current = anim
 		_player.play(anim, BLEND)
 	_player.speed_scale = scale
+
+
+func _first_existing(names: Array[StringName]) -> StringName:
+	for anim in names:
+		if _player.has_animation(anim):
+			return anim
+	return WALK
 
 
 func _length(anim: StringName) -> float:

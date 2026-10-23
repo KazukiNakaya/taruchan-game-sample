@@ -18,6 +18,9 @@ extends CharacterBody3D
 ## 空中での横移動のしやすさ(1 で地上と同じ)
 @export_range(0.0, 1.0) var air_control: float = 0.6
 
+## 発見したあと、掘る動作を続ける時間(秒)
+@export var dig_time: float = 1.0
+
 const GRAVITY: float = 9.8
 
 ## 立ち止まっているとき、注目先が首の可動域を超えた分だけ体を向ける速さ
@@ -27,16 +30,29 @@ const GRAVITY: float = 9.8
 @onready var _head_look: HeadLook = $HeadLook
 @onready var _sniff: SniffSensor = $SniffSensor
 
+var _tail: TailWag
+var _tail_burst: float = 0.0
+
 
 func _ready() -> void:
 	_animator.setup($Model/AnimationPlayer)
 	_head_look.setup(self, $Model, _sniff)
+	_sniff.treasure_found.connect(_on_treasure_found)
+	_tail = TailWag.new()
+	_tail.name = "TailWag"
+	($Model.find_child("Skeleton3D", true, false) as Skeleton3D).add_child(_tail)
+
+
+## クンクン中、または掘っている最中(カメラが寄る合図)
+func is_focusing() -> bool:
+	return _sniff.is_sniffing or _animator.is_digging()
 
 
 func _physics_process(delta: float) -> void:
-	# クンクン中はその場で止まる
+	# クンクン中・掘っている最中はその場で止まる
+	var busy := is_focusing()
 	var input := Vector2.ZERO
-	if not _sniff.is_sniffing:
+	if not busy:
 		input = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := _camera_relative(input)
 	var target_speed := run_speed if Input.is_action_pressed("run") else walk_speed
@@ -51,7 +67,7 @@ func _physics_process(delta: float) -> void:
 	velocity.z = horizontal.z
 	if is_on_floor() and velocity.y <= 0.0:
 		velocity.y = 0.0
-		if Input.is_action_just_pressed("jump") and not _sniff.is_sniffing:
+		if Input.is_action_just_pressed("jump") and not busy:
 			velocity.y = sqrt(2.0 * GRAVITY * jump_height)
 			_animator.start_jump()
 	else:
@@ -66,7 +82,8 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	GameState.add_distance(horizontal.length() * delta)
-	_animator.update(delta, is_on_floor(), horizontal.length(), Input.is_action_pressed("run"))
+	_animator.update(delta, is_on_floor(), horizontal.length(), Input.is_action_pressed("run"), _sniff.is_sniffing)
+	_update_tail(delta, horizontal.length())
 
 
 ## 入力ベクトルをカメラの向き(水平成分のみ)基準のワールド方向に変換する
@@ -75,3 +92,31 @@ func _camera_relative(input: Vector2) -> Vector3:
 		return Vector3.ZERO
 	var yaw := camera.global_rotation.y if camera else 0.0
 	return Vector3(input.x, 0.0, input.y).rotated(Vector3.UP, yaw).normalized()
+
+
+func _on_treasure_found(_data: TreasureData) -> void:
+	_animator.start_dig(dig_time)
+	_tail_burst = 1.5
+
+
+## しっぽ振りの強さ・速さを、状態(待機/移動/におい/クンクン/発見)で決める
+func _update_tail(delta: float, speed: float) -> void:
+	_tail_burst = maxf(_tail_burst - delta, 0.0)
+	var amplitude := 0.15
+	var frequency := 1.5
+	if speed > 0.05:
+		amplitude = 0.22
+		frequency = 2.5 if speed < run_speed * 0.8 else 4.5
+	var nearest := _sniff.nearest
+	if nearest:
+		var d := nearest.global_position.distance_to(global_position)
+		var closeness := clampf(1.0 - d / nearest.data.smell_radius, 0.0, 1.0)
+		amplitude = lerpf(amplitude, 0.5, closeness)
+		frequency = lerpf(frequency, 7.0, closeness)
+	if _sniff.is_sniffing:
+		amplitude = 0.45
+		frequency = 6.0
+	if _tail_burst > 0.0:
+		amplitude = 0.6
+		frequency = 8.0
+	_tail.set_mood(amplitude, frequency)
