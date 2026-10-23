@@ -43,6 +43,8 @@
 
 ## クレジット
 
-- ちょうちょのモデル: [Monarch Butterfly - Minecraft](https://www.fab.com/listings/d70ac764-f650-40e3-ae88-0fcb05237fdd) by cubical
+- ちょうちょのモデル: [Butterflies](https://www.fab.com/listings/d3d80956-31a2-4395-959f-c592002c83c7) by Riada
   ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))。
-  ゲームに合わせて、大きさを変え、羽を左右に分けて動かしています。
+  2匹のうち青い方を使い、ゲームに合わせて大きさを変えています。
+- (現在は使っていません)ちょうちょのモデル: [Monarch Butterfly - Minecraft](https://www.fab.com/listings/d70ac764-f650-40e3-ae88-0fcb05237fdd) by cubical
+  ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))。
