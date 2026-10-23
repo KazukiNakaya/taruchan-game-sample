@@ -6,9 +6,8 @@
 
 ## 遊ぶには
 
-1. [Releases](https://github.com/KazukiNakaya/taruchan-game-sample/releases) から、最新の `taruchan-sanpo-v*-windows.zip` をダウンロードします。
-2. zipを展開します(`taruchan-sanpo.exe` と `taruchan-sanpo.pck` が同じフォルダに入っています)。
-3. `taruchan-sanpo.exe` を起動すると、ゲームが始まります。
+1. [Releases](https://github.com/KazukiNakaya/taruchan-game-sample/releases) から、最新の `taruchan-sanpo-v*-windows.exe` をダウンロードします。
+2. ダウンロードしたexeを起動すると、ゲームが始まります(インストール不要)。
 
 ### ソースから動かす場合
 
