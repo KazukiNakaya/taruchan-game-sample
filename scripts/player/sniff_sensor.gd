@@ -7,6 +7,11 @@ signal treasure_found(data: TreasureData)
 
 ## この距離(m)以内で長押しするとクンクンが進む
 @export var sniff_range: float = 0.6
+## false の間はクンクンできない(座っているときなど)
+var enabled: bool = true
+## においの届く半径にかける倍率(おすわりで広がる)
+var smell_scale: float = 1.0
+
 ## 発見までの長押し時間(秒)
 @export var sniff_time: float = 1.0
 ## 離したときにゲージが戻る速さ(1秒あたり)
@@ -29,7 +34,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	nearest = _find_nearest()
 	var in_range := nearest != null and _distance_to(nearest) <= sniff_range
-	is_sniffing = in_range and Input.is_action_pressed("sniff")
+	is_sniffing = enabled and in_range and Input.is_action_pressed("sniff")
 
 	var previous := progress
 	if is_sniffing:
@@ -58,7 +63,7 @@ func _find_nearest() -> Treasure:
 			continue
 		var dist := _distance_to(treasure)
 		# 検出半径の中でも、そのいいもの自身のにおい半径に入ったものだけ
-		if dist <= treasure.data.smell_radius and dist < best_dist:
+		if dist <= treasure.data.smell_radius * smell_scale and dist < best_dist:
 			best_dist = dist
 			best = treasure
 	return best

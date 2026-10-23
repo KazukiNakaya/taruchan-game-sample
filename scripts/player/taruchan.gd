@@ -21,6 +21,9 @@ extends CharacterBody3D
 ## 発見したあと、掘る動作を続ける時間(秒)
 @export var dig_time: float = 1.0
 
+## おすわりで落ち着いているとき、においの届く半径にかける倍率
+@export var sit_smell_scale: float = 1.5
+
 const GRAVITY: float = 9.8
 
 ## 立ち止まっているとき、注目先が首の可動域を超えた分だけ体を向ける速さ
@@ -48,9 +51,15 @@ func is_focusing() -> bool:
 	return _sniff.is_sniffing or _animator.is_digging()
 
 
+## おすわりで落ち着いている(ベンチでおさんぽを終えられる)
+func is_seated() -> bool:
+	return _animator.is_seated()
+
+
 func _physics_process(delta: float) -> void:
 	# クンクン中・掘っている最中はその場で止まる
-	var busy := is_focusing()
+	var busy := is_focusing() or _animator.is_sit_locked()
+	_update_sit()
 	var input := Vector2.ZERO
 	if not busy:
 		input = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -94,6 +103,14 @@ func _camera_relative(input: Vector2) -> Vector3:
 	return Vector3(input.x, 0.0, input.y).rotated(Vector3.UP, yaw).normalized()
 
 
+## おすわりの切り替え(Ctrl / C / パッドY)。地上で、クンクン・掘る・ジャンプ中でなければ受け付ける
+func _update_sit() -> void:
+	if Input.is_action_just_pressed("sit") and is_on_floor() and not is_focusing() and not _animator.is_jumping():
+		_animator.toggle_sit()
+	_sniff.enabled = not _animator.is_sit_locked()
+	_sniff.smell_scale = sit_smell_scale if _animator.is_seated() else 1.0
+
+
 func _on_treasure_found(_data: TreasureData) -> void:
 	_animator.start_dig(dig_time)
 	_tail_burst = 1.5
@@ -110,7 +127,7 @@ func _update_tail(delta: float, speed: float) -> void:
 	var nearest := _sniff.nearest
 	if nearest:
 		var d := nearest.global_position.distance_to(global_position)
-		var closeness := clampf(1.0 - d / nearest.data.smell_radius, 0.0, 1.0)
+		var closeness := clampf(1.0 - d / (nearest.data.smell_radius * _sniff.smell_scale), 0.0, 1.0)
 		amplitude = lerpf(amplitude, 0.5, closeness)
 		frequency = lerpf(frequency, 7.0, closeness)
 	if _sniff.is_sniffing:

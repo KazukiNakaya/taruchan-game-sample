@@ -3,7 +3,7 @@ extends Node
 ## たるちゃんのアニメ切り替え(待機/歩き/小走り/ジャンプ)。
 ## 本番アニメ(idle / run)がモデルに無い間は、歩きアニメで代用する。名前が届けば自動で使う。
 
-enum State { GROUND, JUMP_START, JUMP_AIR, JUMP_LAND, DIG }
+enum State { GROUND, JUMP_START, JUMP_AIR, JUMP_LAND, DIG, SIT_START, SIT_IDLE, SIT_END }
 
 const IDLE: StringName = &"idle"
 const WALK: StringName = &"walk"
@@ -13,6 +13,9 @@ const JUMP_AIR: StringName = &"jump_air"
 const JUMP_LAND: StringName = &"jump_land"
 const SNIFF: StringName = &"sniff"
 const DIG: StringName = &"dig"
+const SIT_START: StringName = &"sit_start"
+const SIT_IDLE: StringName = &"sit_idle"
+const SIT_END: StringName = &"sit_end"
 
 ## 歩きアニメが足滑りしない速度(m/s)
 const WALK_ANIM_SPEED: float = 0.32
@@ -39,7 +42,33 @@ func setup(player: AnimationPlayer) -> void:
 
 
 func is_jumping() -> bool:
-	return _state != State.GROUND
+	return _state == State.JUMP_START or _state == State.JUMP_AIR or _state == State.JUMP_LAND
+
+
+## 座る動作〜座っている間〜立つ動作(動けない)
+func is_sit_locked() -> bool:
+	return _state == State.SIT_START or _state == State.SIT_IDLE or _state == State.SIT_END
+
+
+## 座り終わって、おすわりで落ち着いている(においの強化・ベンチでの終了の対象)
+func is_seated() -> bool:
+	return _state == State.SIT_IDLE
+
+
+## おすわり/立つの切り替え。座る途中でも立つ途中でも、切り替えが効く
+func toggle_sit() -> void:
+	if _state == State.SIT_START or _state == State.SIT_IDLE:
+		_state = State.SIT_END
+		_timer = _length(SIT_END)
+		_play(SIT_END, 1.0)
+	elif _state == State.GROUND:
+		_state = State.SIT_START
+		_timer = _length(SIT_START)
+		_play(SIT_START, 1.0)
+	elif _state == State.SIT_END:
+		_state = State.SIT_START
+		_timer = _length(SIT_START)
+		_play(SIT_START, 1.0)
 
 
 ## 掘る動作の最中(動けない)
@@ -79,6 +108,15 @@ func update(delta: float, on_floor: bool, speed: float, running: bool, sniffing:
 			if _timer <= 0.0:
 				_state = State.GROUND
 		State.DIG:
+			_timer -= delta
+			if _timer <= 0.0:
+				_state = State.GROUND
+		State.SIT_START:
+			_timer -= delta
+			if _timer <= 0.0:
+				_state = State.SIT_IDLE
+				_play(SIT_IDLE, 1.0)
+		State.SIT_END:
 			_timer -= delta
 			if _timer <= 0.0:
 				_state = State.GROUND
