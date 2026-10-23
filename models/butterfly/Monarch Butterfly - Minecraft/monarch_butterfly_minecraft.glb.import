@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://faiouqtjylxu"
-path="res://.godot/imported/monarch_butterfly_minecraft.glb-f14ef5060bac146dd3ab8243aa111c4e.scn"
+path="res://.godot/imported/monarch_butterfly_minecraft.glb-72d39978e7eed7d543f46a5a98d8aa29.scn"
 
 [deps]
 
-source_file="res://models/butterfly/monarch_butterfly_minecraft.glb"
-dest_files=["res://.godot/imported/monarch_butterfly_minecraft.glb-f14ef5060bac146dd3ab8243aa111c4e.scn"]
+source_file="res://models/butterfly/Monarch Butterfly - Minecraft/monarch_butterfly_minecraft.glb"
+dest_files=["res://.godot/imported/monarch_butterfly_minecraft.glb-72d39978e7eed7d543f46a5a98d8aa29.scn"]
 
 [params]
 

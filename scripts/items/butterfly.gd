@@ -1,7 +1,7 @@
 class_name Butterfly
 extends Node3D
 ## 蝶々。近づくとついてくるのを待ちながら、隠しいいものの場所へ案内する。
-## 見た目と羽ばたきは仮(板2枚を動かしているだけ)。
+## 見た目はモデル(glb)。モデルが無い・読めないときは、仮の板2枚の羽ばたきになる。
 
 enum State { WAIT, GUIDE, HOVER, LEAVE }
 
@@ -15,16 +15,21 @@ enum State { WAIT, GUIDE, HOVER, LEAVE }
 @export var flap_hz: float = 1.0
 ## 見やすいように、実寸(小さな犬に対して)より大きくしている倍率(仮の見た目用)
 @export var size_scale: float = 1.2
-## 本番の蝶々のモデル(glb)。設定されていれば、仮の板2枚の代わりに使う。
-## 羽は左右に分けて、胴体のつけ根を軸に羽ばたかせる(モデルの前が -Z、羽が ±X に広がる向き)
-@export var model_scene: PackedScene
-## モデルの羽を広げた幅(m)
-@export var model_wing_span: float = 0.18
-## モデル座標(元の単位)での、羽のつけ根(胴体の中心線)。モデルを差し替えたら合わせる
-@export var model_hinge: Vector3 = Vector3(144.0, 24.0, 98.0)
-## 胴体とみなす x の範囲(モデル座標)。この範囲に収まるメッシュは胴体、それより左右は羽
-@export var model_body_x_range: Vector2 = Vector2(120.0, 170.0)
 @export var wing_color: Color = Color(0.98, 0.62, 0.15)
+## 本番の蝶々のモデル(glb)。設定されていれば、仮の板2枚の代わりに使う。
+## モデルに入っている羽ばたきアニメ(model_animation)を、ループ再生する
+@export var model_scene: PackedScene
+## 羽ばたきアニメの名前と、再生の速さ(1.0 で元のまま。元は約1秒に1回)
+@export var model_animation: StringName = &"Take 001"
+@export var model_animation_speed: float = 1.0
+## モデルの中で隠すノードの名前(同じglbに入っている別の蝶々や、空のグループ)
+@export var model_hidden_nodes: PackedStringArray = PackedStringArray()
+## モデルの中心(体の位置)とみなすノードの名前。ここが蝶々の原点になる
+@export var model_center_node: String = ""
+## モデルの顔が向いている向き(度)。ゲームの前方(-Z)に合わせる回転(Y軸まわり)
+@export var model_yaw_degrees: float = 0.0
+## モデルの羽を広げたときの幅(m)
+@export var model_wing_span: float = 0.18
 
 var target: Treasure
 var state: State = State.WAIT
@@ -32,8 +37,9 @@ var state: State = State.WAIT
 var _home: Vector3
 var _time: float = 0.0
 var _flap_phase: float = 0.0
-var _left_wing: Node3D
+var _left_wing: Node3D  # 仮の見た目のときだけ使う
 var _right_wing: Node3D
+var _model_player: AnimationPlayer
 var _player: Node3D
 var _leave_time: float = 0.0
 
@@ -62,9 +68,10 @@ func _process(delta: float) -> void:
 	_time += delta
 	_flap_phase += TAU * flap_hz * delta
 	# 水平から少し下げた位置と、大きく持ち上げた位置の間を、なめらかに往復する
-	var flap := 0.35 + 0.65 * sin(_flap_phase)
-	_left_wing.rotation.z = flap
-	_right_wing.rotation.z = -flap
+	if _left_wing:
+		var flap := 0.35 + 0.65 * sin(_flap_phase)
+		_left_wing.rotation.z = flap
+		_right_wing.rotation.z = -flap
 	if _player == null or not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group(&"player") as Node3D
 
@@ -176,59 +183,61 @@ func _make_wing(material: Material, side: float) -> Node3D:
 	return pivot
 
 
-## モデル(glb)の見た目を作る。羽を左右のグループに分けて、つけ根の軸で動かせるようにする。
+## モデル(glb)の見た目を作る。羽ばたきは、モデルに入っているアニメを使う。
 ## 失敗したら false を返し、仮の見た目に戻る。
 func _build_model_visual() -> bool:
 	var model := model_scene.instantiate() as Node3D
 	if model == null:
 		return false
-	var meshes := model.find_children("*", "MeshInstance3D", true, false)
-	if meshes.is_empty():
-		model.queue_free()
+	for node_name in model_hidden_nodes:
+		var hidden := model.find_child(node_name, true, false) as Node3D
+		if hidden:
+			hidden.visible = false
+
+	var holder := Node3D.new()
+	holder.rotation.y = deg_to_rad(model_yaw_degrees)
+	add_child(holder)
+	holder.add_child(model)
+
+	var wing_width := _visible_width(model)
+	if wing_width <= 0.001:
+		holder.queue_free()
 		return false
+	var k := model_wing_span / wing_width
+	model.scale = Vector3.ONE * k
+	# 体の中心を、蝶々の原点に合わせる
+	var center_node := model.find_child(model_center_node, true, false) as Node3D if model_center_node != "" else null
+	var center := _visible_bounds(model, center_node).get_center()
+	model.position = -(center * k)
 
-	var root := Node3D.new()
-	var model_size := _model_width(model)
-	var k := model_wing_span / model_size
-	root.scale = Vector3.ONE * k
-	root.position = -model_hinge * k
-	add_child(root)
-	root.add_child(model)
-
-	# 羽ばたきの軸(つけ根)。root の座標では model_hinge の位置
-	var plus_pivot := Node3D.new()  # +X 側の羽
-	var minus_pivot := Node3D.new()  # -X 側の羽
-	plus_pivot.position = model_hinge
-	minus_pivot.position = model_hinge
-	root.add_child(plus_pivot)
-	root.add_child(minus_pivot)
-
-	for node in meshes:
-		var mesh_instance := node as MeshInstance3D
-		mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var box := mesh_instance.global_transform * mesh_instance.get_aabb()
-		# global_transform は model が root の子になった今の座標。model 座標に戻すため root の逆変換をかける
-		var local_box := root.global_transform.affine_inverse() * box
-		var in_body := local_box.position.x >= model_body_x_range.x and local_box.end.x <= model_body_x_range.y
-		if in_body:
-			continue
-		mesh_instance.reparent(plus_pivot if local_box.get_center().x > model_hinge.x else minus_pivot, true)
-	_left_wing = plus_pivot
-	_right_wing = minus_pivot
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		(node as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_model_player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if _model_player and _model_player.has_animation(model_animation):
+		_model_player.get_animation(model_animation).loop_mode = Animation.LOOP_LINEAR
+		_model_player.speed_scale = model_animation_speed
+		_model_player.play(model_animation)
+		# 複数の蝶々が同じ動きにならないように、再生位置をずらす
+		_model_player.seek(randf() * _model_player.get_animation(model_animation).length, true)
 	return true
 
 
-## モデル全体の、羽を広げた方向(x)の幅(元の単位)
-func _model_width(model: Node3D) -> float:
+## 見えているメッシュ全体の、横幅(元の単位)
+func _visible_width(model: Node3D) -> float:
+	return _visible_bounds(model, null).size.x
+
+
+## 見えているメッシュの範囲(model の座標)。from_node を指定すると、その下だけで測る
+func _visible_bounds(model: Node3D, from_node: Node3D) -> AABB:
+	var root_node: Node = from_node if from_node else model
 	var first := true
 	var total := AABB()
-	for node in model.find_children("*", "MeshInstance3D", true, false):
+	var model_inverse := model.global_transform.affine_inverse()
+	for node in root_node.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
-		var box := mesh_instance.transform * mesh_instance.get_aabb()
-		var parent := mesh_instance.get_parent()
-		while parent and parent != model:
-			box = (parent as Node3D).transform * box
-			parent = parent.get_parent()
+		if not mesh_instance.is_visible_in_tree():
+			continue
+		var box := model_inverse * (mesh_instance.global_transform * mesh_instance.get_aabb())
 		total = box if first else total.merge(box)
 		first = false
-	return maxf(total.size.x, 0.001)
+	return total

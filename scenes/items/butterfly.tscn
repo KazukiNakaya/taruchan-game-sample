@@ -1,8 +1,11 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/items/butterfly.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://models/butterfly/monarch_butterfly_minecraft.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://models/butterfly/Butterflies-Riada/butterflies.glb" id="2_model"]
 
 [node name="Butterfly" type="Node3D"]
 script = ExtResource("1_script")
 model_scene = ExtResource("2_model")
+model_hidden_nodes = PackedStringArray("Body", "Wings_Side1_Wings_Side1", "Wings_Top1_Wings_Top1", "group", "group2")
+model_center_node = "pasted__Body"
+model_yaw_degrees = 180.0

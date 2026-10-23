@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhgfnuoknvhgi"
-path="res://.godot/imported/monarch_butterfly_minecraft_0.png-8c980c8344db34f8a0b58c5983e597bd.ctex"
+path="res://.godot/imported/monarch_butterfly_minecraft_0.png-b90b87ae0b50e06b1a9d93a95e95f33c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/butterfly/monarch_butterfly_minecraft_0.png"
-dest_files=["res://.godot/imported/monarch_butterfly_minecraft_0.png-8c980c8344db34f8a0b58c5983e597bd.ctex"]
+source_file="res://models/butterfly/Monarch Butterfly - Minecraft/monarch_butterfly_minecraft_0.png"
+dest_files=["res://.godot/imported/monarch_butterfly_minecraft_0.png-b90b87ae0b50e06b1a9d93a95e95f33c.ctex"]
 
 [params]
 
