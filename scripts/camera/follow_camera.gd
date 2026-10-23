@@ -48,7 +48,7 @@ func _process(delta: float) -> void:
 	var length := focus_length if focusing else _base_length
 	_arm.spring_length = lerpf(_arm.spring_length, length, 1.0 - exp(-focus_speed * delta))
 	if target:
-		var goal := target.global_position + Vector3.UP * height_offset
+		var goal := target.get_global_transform_interpolated().origin + Vector3.UP * height_offset
 		global_position = global_position.lerp(goal, 1.0 - exp(-follow_speed * delta))
 
 
