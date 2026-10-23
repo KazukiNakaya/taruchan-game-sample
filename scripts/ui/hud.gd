@@ -30,6 +30,7 @@ func _ready() -> void:
 	_counter.add_theme_font_size_override("font_size", 22)
 	_outline(_counter)
 	add_child(_counter)
+	add_child(ControlsGuide.new())
 	_update_counter()
 	GameState.treasure_added.connect(func(_d: TreasureData) -> void: _update_counter())
 
