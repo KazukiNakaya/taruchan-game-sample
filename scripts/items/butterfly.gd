@@ -11,14 +11,15 @@ enum State { WAIT, GUIDE, HOVER, LEAVE }
 @export var notice_radius: float = 3.0
 ## 案内中、たるちゃんがこの距離(m)より遠いと、止まって待つ
 @export var wait_radius: float = 2.5
-@export var flap_hz: float = 11.0
+## 羽ばたきの速さ(1秒あたりの往復回数)。1 で、1秒に1回ゆっくり羽ばたく
+@export var flap_hz: float = 1.0
 ## 見やすいように、実寸(小さな犬に対して)より大きくしている倍率(仮の見た目用)
-@export var size_scale: float = 2.4
+@export var size_scale: float = 1.2
 ## 本番の蝶々のモデル(glb)。設定されていれば、仮の板2枚の代わりに使う。
 ## 羽は左右に分けて、胴体のつけ根を軸に羽ばたかせる(モデルの前が -Z、羽が ±X に広がる向き)
 @export var model_scene: PackedScene
 ## モデルの羽を広げた幅(m)
-@export var model_wing_span: float = 0.36
+@export var model_wing_span: float = 0.18
 ## モデル座標(元の単位)での、羽のつけ根(胴体の中心線)。モデルを差し替えたら合わせる
 @export var model_hinge: Vector3 = Vector3(144.0, 24.0, 98.0)
 ## 胴体とみなす x の範囲(モデル座標)。この範囲に収まるメッシュは胴体、それより左右は羽
@@ -60,7 +61,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	_flap_phase += TAU * flap_hz * delta
-	var flap := 0.25 + 0.75 * absf(sin(_flap_phase))
+	# 水平から少し下げた位置と、大きく持ち上げた位置の間を、なめらかに往復する
+	var flap := 0.35 + 0.65 * sin(_flap_phase)
 	_left_wing.rotation.z = flap
 	_right_wing.rotation.z = -flap
 	if _player == null or not is_instance_valid(_player):
