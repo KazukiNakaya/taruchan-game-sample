@@ -1,6 +1,6 @@
 class_name Title
 extends Control
-## タイトル画面(起動シーン)。はじめる / にっき・ずかん / おわる。
+## タイトル画面(起動シーン)。はじめる / にっき・ずかん / ランキング / おわる。
 
 const WALK_SCENE := "res://scenes/stages/forest_path.tscn"
 const MENU_SCENE := preload("res://scenes/ui/menu.tscn")
@@ -42,6 +42,7 @@ func _build_ui() -> void:
 	var start := _button("はじめる", _on_start_pressed)
 	box.add_child(start)
 	box.add_child(_button("にっき・ずかん", _on_book_pressed))
+	box.add_child(_button("ランキング", _on_ranking_pressed))
 	box.add_child(_button("おわる", func() -> void: get_tree().quit()))
 	start.grab_focus()
 	box.reset_size()
@@ -63,10 +64,18 @@ func _on_start_pressed() -> void:
 
 
 func _on_book_pressed() -> void:
+	_open_menu(0)
+
+
+func _on_ranking_pressed() -> void:
+	_open_menu(2)
+
+
+func _open_menu(tab: int) -> void:
 	# メニューを開いている間は、後ろのボタンにフォーカスが移らないようにする
 	for button in _buttons:
 		button.focus_mode = Control.FOCUS_NONE
-	_menu.open()
+	_menu.open(tab)
 
 
 func _on_menu_closed() -> void:

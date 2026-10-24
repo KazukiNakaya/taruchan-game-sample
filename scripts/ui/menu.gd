@@ -12,6 +12,7 @@ var pause_game: bool = true
 var _tabs: TabContainer
 var _diary_box: VBoxContainer
 var _book_box: VBoxContainer
+var _ranking_board: RankingBoard
 
 
 func _ready() -> void:
@@ -25,8 +26,10 @@ func is_open() -> bool:
 	return visible
 
 
-func open() -> void:
+## tab: 最初に開くタブ(0=にっき 1=ずかん 2=ランキング)
+func open(tab: int = 0) -> void:
 	_refresh()
+	_tabs.current_tab = tab
 	visible = true
 	AudioManager.play_ui(&"menu_open")
 	if pause_game:
@@ -76,6 +79,9 @@ func _build_ui() -> void:
 	box.add_child(_tabs)
 	_diary_box = _add_scroll_tab("にっき")
 	_book_box = _add_scroll_tab("ずかん")
+	var ranking_box := _add_scroll_tab("ランキング")
+	_ranking_board = RankingBoard.new()
+	ranking_box.add_child(_ranking_board)
 
 	var close_button := Button.new()
 	close_button.text = "とじる (Tab / Esc)"
@@ -115,6 +121,7 @@ func _add_scroll_tab(title: String) -> VBoxContainer:
 func _refresh() -> void:
 	_fill_diary()
 	_fill_book()
+	_ranking_board.show_entries()
 
 
 func _fill_diary() -> void:

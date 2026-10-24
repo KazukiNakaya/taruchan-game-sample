@@ -12,3 +12,6 @@ models/_source/
 
 # エクスポート成果物
 build/
+
+# Python 仮想環境
+.venv/
