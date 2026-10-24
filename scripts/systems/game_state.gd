@@ -14,12 +14,16 @@ var elapsed: float = 0.0
 var distance: float = 0.0
 var running: bool = false
 var save_data: SaveData
+var ranking: Ranking
+## 直近のおさんぽのスコアの内訳(Ranking.calc_score の結果)
+var last_score: Dictionary = {}
 ## 直近のおさんぽで初めて見つけたものの id
 var last_new_ids: PackedStringArray = PackedStringArray()
 
 
 func _ready() -> void:
 	save_data = SaveData.load_or_new()
+	ranking = Ranking.load_or_new()
 
 
 func _process(delta: float) -> void:
@@ -32,6 +36,7 @@ func start_walk() -> void:
 	total_treasures = 0
 	total_changed.emit(total_treasures)
 	last_new_ids = PackedStringArray()
+	last_score = {}
 	elapsed = 0.0
 	distance = 0.0
 	running = true
@@ -40,6 +45,7 @@ func start_walk() -> void:
 ## おさんぽ終了: 日記に1ページ追加し、図鑑を更新してセーブする
 func finish_walk() -> void:
 	running = false
+	last_score = Ranking.calc_score(found, elapsed, total_treasures)
 	var entry := DiaryEntry.new()
 	entry.date_text = Time.get_datetime_string_from_system(false, true)
 	entry.duration = elapsed
