@@ -56,7 +56,7 @@
 - [x] **Step 19 v1.0 リリース(exe化)** (`step19/release-v1.0`): Windows用のexeを書き出し、GitHub Releaseに載せる。`export_presets.cfg` にプリセット「Windows Desktop」を用意(exeにpckを埋め込んだ1ファイル、docs・orders・バックアップ・元データは除外)。配布は `taruchan-sanpo-v1.0-windows.exe` の1ファイル。タグは注釈付き `v1.0`。マージ後にmain上でタグ付け・Release作成
   - 確認: exeを起動し、タイトル → おさんぽ → ゴールまで遊べる。セーブが保存される
 
-- [ ] **Step 20 v1.1 ランキングとexeアイコン** (`step20/ranking`): (a) exeのアイコンを `icon/icon.png`(`tools/make_icon.py` で `icon/icon.ico` を生成)にする。(b) おさんぽのスコアを `Ranking.calc_score` で計算 = いいものの点(★1=100/★2=250/★3=500)+ タイムボーナス(600秒−クリア秒)×5(最大3000)+ 全部あつめたボーナス1000。(c) ローカルのTOP10(`user://ranking.json`)。ゴール後にTOP10に入ったら3文字の名前入力(アーケード式、↑↓/十字で文字、←→で桁、英数字は直接入力可、Enterで決定)→ランキング表。タイトルの「ランキング」ボタンとメニューの「ランキング」タブからも見られる。同点はタイムが速い方が上
+- [x] **Step 20 v1.1 ランキングとexeアイコン** (`step20/ranking`): (a) exeのアイコンを `icon/icon.png`(`tools/make_icon.py` で `icon/icon.ico` を生成)にする。(b) おさんぽのスコアを `Ranking.calc_score` で計算 = いいものの点(★1=100/★2=250/★3=500)+ タイムボーナス(600秒−クリア秒)×5(最大3000)+ 全部あつめたボーナス1000。(c) ローカルのTOP10(`user://ranking.json`)。ゴール後にTOP10に入ったら3文字の名前入力(アーケード式、↑↓/十字で文字、←→で桁、英数字は直接入力可、Enterで決定)→ランキング表。タイトルの「ランキング」ボタンとメニューの「ランキング」タブからも見られる。同点はタイムが速い方が上。v1.1としてマージ後にmain上でタグ付け・Release作成(PR #33、`taruchan-sanpo-v1.1-windows.exe` を添付)
   - 確認: ゴール後にスコアが出て、TOP10に入ると名前入力 → 登録 → 表に反映。再起動しても残る。exeのアイコンが変わる
 
 ## 保留(今回は実装しない)
